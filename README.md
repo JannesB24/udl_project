@@ -34,8 +34,16 @@ We strongly recommend a Linux based system. If you are using Windows consider [i
 make setup-dev
 ```
 
-This install the additional development dependencies as listed in `infrastructure/requirements.txt`.
+This installs the additional development dependencies as listed in `infrastructure/requirements-dev.txt`.
+
+To activate the pre-commit hooks, run:
+```bash
+pre-commit install
+```
+
+To run the pre-commit hooks manually, execute:
+```bash
+pre-commit run --all-files
+```
 
 To set up the project on Windows, see the instructions in the [Development Setup](#development-setup) section above.
-
-

@@ -19,13 +19,11 @@ install-requirements:
 	.venv/bin/pip install -r infrastructure/requirements.txt
 
 install-dev-requirements:
-	.venv/bin/pip install -r infrastructure/requirements-dev.in
+	.venv/bin/pip install -r infrastructure/requirements-dev.txt
 
 
 setup: create-local-env install-requirements
 	@echo "To activate the virtual environment, run:"
 	@echo "  source .venv/bin/activate"
 
-setup-dev: install-requirements install-dev-requirements
-
-
+setup-dev: setup install-dev-requirements
