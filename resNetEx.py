@@ -13,57 +13,29 @@ import torch.nn.functional as F
 import torch.optim as optim
 import DataloaderFlowerSet
 import Models
-import ResnetThief
+import DataLoaderFFSet
 #fck cuda
 device=  torch.device('cpu')
 
-image_batch =DataloaderFlowerSet.train_loader
+image_batch =DataLoaderFFSet.train_dataloader_simple
 def weights_init(layer_in):
   if isinstance(layer_in, nn.Linear):
     nn.init.kaiming_uniform_(layer_in.weight)
     layer_in.bias.data.fill_(0.0)
 
-def run_one_step_of_model(model):
-  # choose cross entropy loss function (equation 5.24 in the loss notes)
-  loss_function = nn.CrossEntropyLoss()
-  # construct SGD optimizer and initialize learning rate and momentum
-  optimizer = torch.optim.SGD(model.parameters(), lr = 0.05, momentum=0.9)
-
-  # load the data into a class that creates the batches
-  data_loader = DataloaderFlowerSet.test_loader
-  # Initialize model weights
-  model.apply(weights_init)
-
-  # Get a batch
-  for i, data in enumerate(data_loader):
-    # retrieve inputs and labels for this batch
-    x_batch, y_batch = data
-    # zero the parameter gradients
-    optimizer.zero_grad()
-    # forward pass -- calculate model output
-    pred = model(x_batch)
-    # compute the loss
-    loss = loss_function(pred, y_batch)
-    # backward pass
-    loss.backward()
-    # SGD update
-    optimizer.step()
-    # Break out of this loop -- we just want to see the first
-    # iteration, but usually we would continue
-    break
 
 
 
 
-model = Models.ResBlock(102)
-
+model = Models.ResBlock(5)
+model.apply(weights_init)
 from datetime import datetime
 
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 # Number of epochs for training
-num_epochs = 2
+num_epochs = 10
 
 
 train_losses = np.zeros(num_epochs)
@@ -81,7 +53,7 @@ for epoch in range(num_epochs):
     n_total_train = 0
 
     
-    for images, labels in DataloaderFlowerSet.train_loader:
+    for images, labels in DataLoaderFFSet.train_dataloader_simple:
 
         images = images.to(device)
         labels = labels.to(device)
@@ -111,7 +83,7 @@ for epoch in range(num_epochs):
     n_correct_val = 0
     n_total_val = 0
     with torch.no_grad():  
-        for images, labels in DataloaderFlowerSet.val_loader:
+        for images, labels in DataLoaderFFSet.test_dataloader_simple:
             images = images.to(device)
             labels = labels.to(device)
 
@@ -134,7 +106,8 @@ for epoch in range(num_epochs):
     # Print the metrics for the current epoch
     print(f'Epoch [{epoch+1}/{num_epochs}] - '
           f'Train Loss: {train_loss:.4f}, Train Accuracy: {train_accs[epoch]:.4f} | '
-          f'Val Loss: {val_loss:.4f}, Val Accuracy: {val_accs[epoch]:.4f} | '
+      
+         f'Val Loss: {val_loss:.4f}, Val Accuracy: {val_accs[epoch]:.4f} | '
           f'Duration: {duration}')
 
 # Optionally, save the model after training
