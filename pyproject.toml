@@ -1,0 +1,19 @@
+[project]
+name = "udl_project"
+version = "0.1.0"
+description = "A sample Python project"
+authors = [
+    { name="Jannes Bruns", email="jannbruns@uos.de" }
+]
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+[project.urls]
+Homepage = "https://github.com/JannesB24/udl_project"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint.pydocstyle]
+convention = 'google'
