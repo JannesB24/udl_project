@@ -27,3 +27,6 @@ setup: create-local-env install-requirements
 	@echo "  source .venv/bin/activate"
 
 setup-dev: setup install-dev-requirements
+
+run-pc:
+	.venv/bin/pre-commit run -a
