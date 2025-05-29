@@ -181,3 +181,6 @@ data
 
 # produced artifacts
 artifacts
+
+# Visual Studio Code
+.vscode
