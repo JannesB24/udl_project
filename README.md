@@ -7,6 +7,25 @@
 # udl_project
 This repository was created for the seminar "Understanding Deep Learning," which took place in the summer term of 2025 at the University of Osnabrück.
 
+# project setup
+.
+├── Makefile (project setup on linux based systems)
+├── README.md
+├── artifacts (place to store output from the project e.g. stored model)
+│   └── flower_classification_model.pth
+├── infrastructure ((pinned) dependencies)
+│   ├── requirements-dev.txt
+│   ├── requirements.in
+│   └── requirements.txt
+├── pyproject.toml
+└── udl_project (source code)
+
+
+To create tree view run:
+```bash
+tree -I '.*|*data*'
+```
+Ignoring hidden and explicitly named files
 
 # Code Setup
 We strongly recommend a Linux based system. If you are using Windows consider [installing WSL](https://learn.microsoft.com/de-de/windows/wsl/install) to use a Linux subsystem on Windows. We suggest using the latest Ubuntu.

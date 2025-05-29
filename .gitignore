@@ -176,6 +176,8 @@ cython_debug/
 # Datasets
 Flower Classification Dataset
 FFset
+# use "data" in the future
+data
 
 # produced artifacts
 artifacts

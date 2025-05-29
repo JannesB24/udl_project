@@ -1,9 +1,13 @@
 import numpy as np
 import torch
 import torch.nn as nn
-from udl_project import Models
 from udl_project import DataLoaderFFSet
 from datetime import datetime
+
+from udl_project.models.res_block import ResBlock
+
+# Number of epochs for training
+EPOCHS = 10
 
 
 def weights_init(layer_in):
@@ -13,26 +17,23 @@ def weights_init(layer_in):
 
 
 def main():
-    # fck cuda
     device = torch.device("cpu")
 
-    # image_batch = DataLoaderFFSet.train_dataloader_simple
-
-    model = Models.ResBlock(5)
+    # create model and initialize parameters
+    model = ResBlock(5)
     model.apply(weights_init)
 
+    # choose loss function and optimizer
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-    # Number of epochs for training
-    num_epochs = 10
+    # initial tracking variables
+    train_losses = np.zeros(EPOCHS)
+    val_losses = np.zeros(EPOCHS)
+    train_accs = np.zeros(EPOCHS)
+    val_accs = np.zeros(EPOCHS)
 
-    train_losses = np.zeros(num_epochs)
-    val_losses = np.zeros(num_epochs)
-    train_accs = np.zeros(num_epochs)
-    val_accs = np.zeros(num_epochs)
-
-    for epoch in range(num_epochs):
+    for epoch in range(EPOCHS):
         model.train()
         t0 = datetime.now()
 
@@ -64,6 +65,7 @@ def main():
         train_losses[epoch] = train_loss
         train_accs[epoch] = n_correct_train / n_total_train
         print(train_loss)
+
         # Validation phase
         model.eval()
         n_correct_val = 0
@@ -91,7 +93,7 @@ def main():
 
         # Print the metrics for the current epoch
         print(
-            f"Epoch [{epoch + 1}/{num_epochs}] - "
+            f"Epoch [{epoch + 1}/{EPOCHS}] - "
             f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_accs[epoch]:.4f} | "
             f"Val Loss: {val_loss:.4f}, Val Accuracy: {val_accs[epoch]:.4f} | "
             f"Duration: {duration}"
