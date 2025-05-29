@@ -11,10 +11,10 @@ import torchvision
 from torchvision import transforms,datasets
 import torch.nn.functional as F
 import torch.optim as optim
-import DataloaderFlowerSet
 import Models
 import DataLoaderFFSet
-#fck cuda
+import pickle
+
 device=  torch.device('cpu')
 
 image_batch =DataLoaderFFSet.train_dataloader_simple
@@ -112,3 +112,14 @@ for epoch in range(num_epochs):
 
 # Optionally, save the model after training
 torch.save(model.state_dict(), "flower_classification_model.pth")
+
+# Save results for comparison
+original_results = {
+    'train_losses': train_losses,
+    'val_losses': val_losses, 
+    'train_accs': train_accs,
+    'val_accs': val_accs
+}
+
+with open('original_results.pkl', 'wb') as f:
+    pickle.dump(original_results, f)
