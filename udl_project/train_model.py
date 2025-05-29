@@ -16,7 +16,7 @@ def weights_init(layer_in):
         layer_in.bias.data.fill_(0.0)
 
 
-def main():
+def train_model():
     device = torch.device("cpu")
 
     # create model and initialize parameters
@@ -104,4 +104,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    train_model()

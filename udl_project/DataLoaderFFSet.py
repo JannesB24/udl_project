@@ -2,9 +2,9 @@ import os
 from torch.utils.data import random_split
 from torch.utils.data import DataLoader
 
-# Create simple transform
 from torchvision import datasets, transforms
 
+# Create simple transform
 simple_transform = transforms.Compose(
     [
         transforms.Resize((64, 64)),
@@ -12,7 +12,7 @@ simple_transform = transforms.Compose(
     ]
 )
 
-data_dir = "FFset/train"
+data_dir = "data/train"
 dataset = datasets.ImageFolder(data_dir, transform=simple_transform)
 
 
