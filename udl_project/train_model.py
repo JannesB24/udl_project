@@ -111,7 +111,7 @@ def train_model():
         "val_accs": val_accs,
     }
 
-    with open("original_results.pkl", "wb") as f:
+    with open("artifacts/original_results.pkl", "wb") as f:
         pickle.dump(original_results, f)
 
 

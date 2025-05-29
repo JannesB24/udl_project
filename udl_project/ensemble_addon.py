@@ -1,7 +1,7 @@
 """
 Ensemble Add-on for Your Original resNetEx.py
 This file ONLY handles the ensemble training and comparison
-Your original resNetEx.py remains unchanged and is used as-is
+Your original train_model.py remains unchanged and is used as-is
 """
 
 import numpy as np
@@ -43,7 +43,7 @@ class EnsembleModel(nn.Module):
 def load_original_results():
     try:
         # Try to load saved results from original resNetEx.py
-        with open("original_results.pkl", "rb") as f:
+        with open("artifacts/original_results.pkl", "rb") as f:
             return pickle.load(f)
     except FileNotFoundError:
         return None
@@ -134,8 +134,10 @@ def run_ensemble_only():
         )
 
     # Save ensemble model
-    torch.save(model.state_dict(), "ensemble_flower_classification_model.pth")
-    print("Ensemble model saved as ensemble_flower_classification_model.pth")
+    torch.save(model.state_dict(), "artifacts/ensemble_flower_classification_model.pth")
+    print(
+        "Ensemble model saved as ensemble_flower_classification_model.pth to the artifacts folder."
+    )
 
     # Save ensemble results
     ensemble_results = {
@@ -145,7 +147,7 @@ def run_ensemble_only():
         "val_accs": val_accs,
     }
 
-    with open("ensemble_results.pkl", "wb") as f:
+    with open("artifacts/ensemble_results.pkl", "wb") as f:
         pickle.dump(ensemble_results, f)
 
     return ensemble_results
