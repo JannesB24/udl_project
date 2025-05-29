@@ -12,13 +12,13 @@ from datetime import datetime
 import pickle
 
 import DataLoaderFFSet
-import Models
+from udl_project.models.res_block import ResBlock
 
 
 class EnsembleModel(nn.Module):
     def __init__(self, num_classes, num_models=3):
         super(EnsembleModel, self).__init__()
-        self.models = nn.ModuleList([Models.ResBlock(num_classes) for _ in range(num_models)])
+        self.models = nn.ModuleList([ResBlock(num_classes) for _ in range(num_models)])
 
         # Apply different initializations (from Sören's weights_init)
         for i, model in enumerate(self.models):
