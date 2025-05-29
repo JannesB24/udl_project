@@ -172,5 +172,15 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Datasets
 Flower Classification Dataset
 FFset
+# use "data" in the future
+data
+
+# produced artifacts
+artifacts
+
+# Visual Studio Code
+.vscode
