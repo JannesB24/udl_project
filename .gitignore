@@ -172,5 +172,10 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Datasets
 Flower Classification Dataset
 FFset
+
+# produced artifacts
+artifacts
