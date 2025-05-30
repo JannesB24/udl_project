@@ -74,3 +74,14 @@ make run-pc
 ```
 
 To set up the project on Windows, see the instructions in the [Development Setup](#development-setup) section above.
+
+# AI usage disclaimer
+
+GitHub copilot is being used in this project for the following purposes:
+
+- Automatically reviewing Pull Requests, creating commit messages, descriptions.
+- Suggestions for documentation
+- Giving explanation on code snippets
+- Support with arising bugs
+
+The idea and the work on the code itself did not stem from GitHub copilot and is the work of the authors.
