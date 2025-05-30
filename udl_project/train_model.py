@@ -2,10 +2,13 @@ import pickle
 import numpy as np
 import torch
 import torch.nn as nn
-from udl_project import DataLoaderFFSet
 from datetime import datetime
 
-from udl_project.models.res_block import ResBlock
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import DataLoaderFFSet
+from models.res_block import ResBlock
 
 # Number of epochs for training
 EPOCHS = 10
@@ -18,6 +21,9 @@ def weights_init(layer_in):
 
 
 def train_model():
+    print("="*60)
+    print("TRAINING ORIGINAL RESNET MODEL")
+    print("="*60)
     device = torch.device("cpu")
 
     # create model and initialize parameters
@@ -33,6 +39,8 @@ def train_model():
     val_losses = np.zeros(EPOCHS)
     train_accs = np.zeros(EPOCHS)
     val_accs = np.zeros(EPOCHS)
+
+    print("Training Unregularized ResNet...")
 
     for epoch in range(EPOCHS):
         model.train()
@@ -100,8 +108,12 @@ def train_model():
             f"Duration: {duration}"
         )
 
-    # Optionally, save the model after training
-    torch.save(model.state_dict(), "artifacts/flower_classification_model.pth")
+    script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    artifacts_dir = os.path.join(script_dir, "artifacts")
+    os.makedirs(artifacts_dir, exist_ok=True)
+
+    # Save the model using the artifacts_dir variable
+    torch.save(model.state_dict(), os.path.join(artifacts_dir, "original_model.pth"))
 
     # Save results for comparison
     original_results = {
@@ -109,11 +121,15 @@ def train_model():
         "val_losses": val_losses,
         "train_accs": train_accs,
         "val_accs": val_accs,
+        "model_name": "Original ResNet"
     }
 
-    with open("artifacts/original_results.pkl", "wb") as f:
+    with open(os.path.join(artifacts_dir, "original_results.pkl"), "wb") as f:
         pickle.dump(original_results, f)
 
+    print(f"\nOriginal model training completed!")
+    print(f"Final overfitting gap: {train_accs[-1] - val_accs[-1]:.4f}")
+    print(f"Results saved to {os.path.join(artifacts_dir, 'original_results.pkl')}")
 
 if __name__ == "__main__":
     train_model()

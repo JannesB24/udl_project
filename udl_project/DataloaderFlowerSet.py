@@ -19,17 +19,9 @@ transform = transforms.Compose(
 )
 
 batch_size = 128
-
 train_ds = torchvision.datasets.ImageFolder(train_dir, transform=transform)
-
 train_loader = torch.utils.data.DataLoader(train_ds, batch_size=batch_size, shuffle=True)
-
-
 val_ds = torchvision.datasets.ImageFolder(val_dir, transform=transform)
-
 val_loader = torch.utils.data.DataLoader(val_ds, batch_size=batch_size, shuffle=True)
-
-
 test_ds = torchvision.datasets.ImageFolder(train_dir, transform=transform)
-
 test_loader = torch.utils.data.DataLoader(test_ds, batch_size=batch_size, shuffle=True)
