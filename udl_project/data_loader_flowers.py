@@ -25,6 +25,10 @@ class DataLoaderFlowers:
         self.num_workers = num_workers
 
     def get_test_dataloader(self) -> DataLoader:
+        """Creates a DataLoader for the test dataset.
+        Returns:
+            DataLoader: DataLoader for the test dataset.
+        """
         print(
             f"Creating test data loader with batch size {self.batch_size} and {self.num_workers} workers."
         )
@@ -35,6 +39,10 @@ class DataLoaderFlowers:
         return test_dataloader
 
     def get_train_dataloader(self) -> DataLoader:
+        """Creates a DataLoader for the training dataset.
+        Returns:
+            DataLoader: DataLoader for the training dataset.
+        """
         print(
             f"Creating train data loader with batch size {self.batch_size} and {self.num_workers} workers."
         )
@@ -58,6 +66,9 @@ class DataLoaderFlowers:
             batch_size (int): Number of samples per batch.
             num_workers (int): Number of subprocesses to use for data loading.
             image_dim (tuple): Dimensions to which images will be resized (square).
+
+        Returns:
+            DataLoaderFlowers: DataLoaderFlowers instance
         """
         simple_transform = transforms.Compose(
             [
