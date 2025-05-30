@@ -7,6 +7,10 @@
 # udl_project
 This repository was created for the seminar "Understanding Deep Learning," which took place in the summer term of 2025 at the University of Osnabrück.
 
+## What this repository shows
+
+TODO: describe the novelty of the project
+
 # project setup
 .
 ├── Makefile (*project setup on linux based systems*)
