@@ -44,7 +44,7 @@ class DataLoaderFlowers:
         Returns:
             DataLoader: DataLoader for the training dataset.
         """
-        logging.info(
+        logging.debug(
             f"Creating train data loader with batch size {self.batch_size} and {self.num_workers} workers."
         )
 
