@@ -4,6 +4,7 @@ from torch.utils.data import random_split
 from torch.utils.data import DataLoader
 
 from torchvision import datasets, transforms
+import logging
 
 # TODO: possibly relocate to config file or make them accessible for other modules!?
 BATCH_SIZE = 32
@@ -29,7 +30,7 @@ class DataLoaderFlowers:
         Returns:
             DataLoader: DataLoader for the test dataset.
         """
-        print(
+        logging.info(
             f"Creating test data loader with batch size {self.batch_size} and {self.num_workers} workers."
         )
 
@@ -43,7 +44,7 @@ class DataLoaderFlowers:
         Returns:
             DataLoader: DataLoader for the training dataset.
         """
-        print(
+        logging.info(
             f"Creating train data loader with batch size {self.batch_size} and {self.num_workers} workers."
         )
 
