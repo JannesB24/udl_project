@@ -29,4 +29,4 @@ setup: create-local-env install-requirements
 setup-dev: setup install-dev-requirements
 
 run-pc:
-	.venv/bin/pre-commit run -a
+	.venv/bin/pre-commit run --all-files
