@@ -77,7 +77,7 @@ To set up the project on Windows, see the instructions in the [Development Setup
 
 # AI usage disclaimer
 
-GitHub copilot is being used in this project for the following purposes:
+GitHub Copilot is being used in this project for the following purposes:
 
 - Automatically reviewing Pull Requests, creating commit messages, descriptions.
 - Suggestions for documentation
