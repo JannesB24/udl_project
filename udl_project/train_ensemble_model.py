@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import pickle
 
-import DataLoaderFFSet
+from udl_project.data_loader_flowers import DataLoaderFlowers
 from udl_project.models.ensemble_model import EnsembleModel
 from pathlib import Path
 
@@ -49,6 +49,9 @@ def run_ensemble_only(artifacts_dir: Path):
 
     print("Training Ensemble ResBlock...")
 
+    # use standard parameters
+    dataloader = DataLoaderFlowers.create_dataloader()
+
     for epoch in range(num_epochs):
         model.train()
         t0 = datetime.now()
@@ -59,7 +62,7 @@ def run_ensemble_only(artifacts_dir: Path):
         n_total_train = 0
 
         # Training phase (same structure as Sören)
-        for images, labels in DataLoaderFFSet.train_dataloader_simple:
+        for images, labels in dataloader.get_train_dataloader():
             images = images.to(device)
             labels = labels.to(device)
 
@@ -84,7 +87,7 @@ def run_ensemble_only(artifacts_dir: Path):
         n_correct_val = 0
         n_total_val = 0
         with torch.no_grad():
-            for images, labels in DataLoaderFFSet.test_dataloader_simple:
+            for images, labels in dataloader.get_test_dataloader():
                 images = images.to(device)
                 labels = labels.to(device)
 
