@@ -6,6 +6,7 @@ from datetime import datetime
 
 import sys
 import os
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import DataLoaderFFSet
 from models.res_block import ResBlock
@@ -21,9 +22,9 @@ def weights_init(layer_in):
 
 
 def train_model():
-    print("="*60)
+    print("=" * 60)
     print("TRAINING ORIGINAL RESNET MODEL")
-    print("="*60)
+    print("=" * 60)
     device = torch.device("cpu")
 
     # create model and initialize parameters
@@ -121,15 +122,16 @@ def train_model():
         "val_losses": val_losses,
         "train_accs": train_accs,
         "val_accs": val_accs,
-        "model_name": "Original ResNet"
+        "model_name": "Original ResNet",
     }
 
     with open(os.path.join(artifacts_dir, "original_results.pkl"), "wb") as f:
         pickle.dump(original_results, f)
 
-    print(f"\nOriginal model training completed!")
+    print("\nOriginal model training completed!")
     print(f"Final overfitting gap: {train_accs[-1] - val_accs[-1]:.4f}")
     print(f"Results saved to {os.path.join(artifacts_dir, 'original_results.pkl')}")
+
 
 if __name__ == "__main__":
     train_model()

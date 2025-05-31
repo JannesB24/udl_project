@@ -12,7 +12,7 @@ simple_transform = transforms.Compose(
     ]
 )
 
-data_dir = 'data/train'
+data_dir = "data/train"
 dataset = datasets.ImageFolder(data_dir, transform=simple_transform)
 
 
@@ -40,7 +40,6 @@ train_data, test_data = random_split(dataset, [train_size, test_size])
 # Setup batch size and number of workers
 BATCH_SIZE = 32
 NUM_WORKERS = os.cpu_count()
-
 print(f"Creating DataLoader's with batch size {BATCH_SIZE} and {NUM_WORKERS} workers.")
 
 # Create DataLoader's

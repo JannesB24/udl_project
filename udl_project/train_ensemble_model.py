@@ -5,9 +5,11 @@ from datetime import datetime
 import pickle
 import os
 import sys
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import DataLoaderFFSet
 from models.ensemble_model import EnsembleModel
+
 
 def train_ensemble_model():
     print("=" * 60)
@@ -40,7 +42,7 @@ def train_ensemble_model():
         n_correct_train = 0
         n_total_train = 0
 
-        # Training phase 
+        # Training phase
         for images, labels in DataLoaderFFSet.train_dataloader_simple:
             images = images.to(device)
             labels = labels.to(device)
@@ -61,7 +63,7 @@ def train_ensemble_model():
         train_losses[epoch] = train_loss
         train_accs[epoch] = n_correct_train / n_total_train
 
-        # Validation phase 
+        # Validation phase
         model.eval()
         n_correct_val = 0
         n_total_val = 0
@@ -103,13 +105,14 @@ def train_ensemble_model():
         "val_losses": val_losses,
         "train_accs": train_accs,
         "val_accs": val_accs,
-        "model_name": "Ensemble ResNet"
+        "model_name": "Ensemble ResNet",
     }
 
     with open(os.path.join(artifacts_dir, "ensemble_results.pkl"), "wb") as f:
         pickle.dump(ensemble_results, f)
 
     return ensemble_results
+
 
 def main():
     print("ENSEMBLE REGULARIZATION TRAINING")

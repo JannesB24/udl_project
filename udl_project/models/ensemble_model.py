@@ -3,6 +3,7 @@ import torch.nn as nn
 
 from udl_project.models.res_block import ResBlock
 
+
 class EnsembleModel(nn.Module):
     def __init__(self, num_classes, num_models=3):
         super(EnsembleModel, self).__init__()

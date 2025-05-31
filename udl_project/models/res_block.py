@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 class ResBlock(torch.nn.Module):
     def __init__(self, numClasses):
         super().__init__()
