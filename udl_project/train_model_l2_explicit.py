@@ -4,11 +4,9 @@ import torch.nn as nn
 from datetime import datetime
 import pickle
 import os
-import sys
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import DataLoaderFFSet
-from models.res_block import ResBlock
+from udl_project import DataLoaderFFSet
+from udl_project.models.res_block import ResBlock
 
 
 def weights_init(layer_in):

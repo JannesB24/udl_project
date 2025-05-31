@@ -4,12 +4,10 @@ import torch
 import torch.nn as nn
 from datetime import datetime
 
-import sys
 import os
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import DataLoaderFFSet
-from models.res_block import ResBlock
+from udl_project import DataLoaderFFSet
+from udl_project.models.res_block import ResBlock
 
 # Number of epochs for training
 EPOCHS = 10

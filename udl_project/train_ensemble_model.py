@@ -4,11 +4,8 @@ import torch.nn as nn
 from datetime import datetime
 import pickle
 import os
-import sys
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import DataLoaderFFSet
-from models.ensemble_model import EnsembleModel
+from udl_project import DataLoaderFFSet
+from udl_project.models.ensemble_model import EnsembleModel
 
 
 def train_ensemble_model():
@@ -85,7 +82,6 @@ def train_ensemble_model():
         val_accs[epoch] = n_correct_val / n_total_val
         duration = datetime.now() - t0
 
-        # Print in same format as Sören
         print(
             f"Epoch [{epoch + 1}/{num_epochs}] - "
             f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_accs[epoch]:.4f} | "

@@ -4,15 +4,15 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
-import os
+from pathlib import Path
 
 
-def load_results():
+def load_results(artifacts_directory: Path):
     results = {}
 
     # Load original results
     try:
-        with open("artifacts/original_results.pkl", "rb") as f:
+        with open(artifacts_directory / "original_results.pkl", "rb") as f:
             results["Original ResNet"] = pickle.load(f)
         print("Loaded original results")
     except:
@@ -21,7 +21,7 @@ def load_results():
 
     # Load L2 results
     try:
-        with open("artifacts/l2_results.pkl", "rb") as f:
+        with open(artifacts_directory / "l2_results.pkl", "rb") as f:
             results["L2 Regularized ResNet"] = pickle.load(f)
         print("Loaded L2 results")
     except:
@@ -30,7 +30,7 @@ def load_results():
 
     # Load ensemble results
     try:
-        with open("artifacts/ensemble_results.pkl", "rb") as f:
+        with open(artifacts_directory / "ensemble_results.pkl", "rb") as f:
             results["Ensemble ResNet"] = pickle.load(f)
         print("Loaded ensemble results")
     except:
@@ -40,7 +40,10 @@ def load_results():
     return results
 
 
-def create_comprehensive_plots(results):
+def create_comprehensive_plots(results, artifacts_directory: Path):
+    plots_path = artifacts_directory / "plots"
+    plots_path.mkdir(exist_ok=True)
+
     print("\nCreating comprehensive comparison plots...")
 
     # Set up colors and styles for each method
@@ -114,7 +117,7 @@ def create_comprehensive_plots(results):
     axes[1, 1].grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig("artifacts/udl_comprehensive_comparison.png", dpi=300, bbox_inches="tight")
+    plt.savefig(plots_path / "udl_comprehensive_comparison.png", dpi=300, bbox_inches="tight")
     plt.close()
 
     # Overfitting Analysis - 1x3 subplots
@@ -190,7 +193,7 @@ def create_comprehensive_plots(results):
         )
 
     plt.tight_layout()
-    plt.savefig("artifacts/udl_overfitting_analysis.png", dpi=300, bbox_inches="tight")
+    plt.savefig(plots_path / "udl_overfitting_analysis.png", dpi=300, bbox_inches="tight")
     plt.close()
 
     # Combined metrics plot
@@ -300,7 +303,7 @@ def create_comprehensive_plots(results):
     )
 
     plt.tight_layout()
-    plt.savefig("artifacts/udl_summary_dashboard.png", dpi=300, bbox_inches="tight")
+    plt.savefig(plots_path / "udl_summary_dashboard.png", dpi=300, bbox_inches="tight")
     plt.close()
 
 
@@ -335,24 +338,18 @@ def print_summary(results):
     print(f"   Overfitting gap: {gaps[best_model]:.4f}")
 
 
-def main():
+def main(artifacts_directory: Path):
     print("COMPREHENSIVE UDL REGULARIZATION COMPARISON PLOTTER")
     print("=" * 60)
 
-    # Check if artifacts folder exists
-    if not os.path.exists("artifacts"):
-        print("Artifacts folder not found!")
-        print("Make sure you've run all training scripts first.")
-        return
-
     # Load results
-    results = load_results()
+    results = load_results(artifacts_directory)
     if results is None:
         print("Could not load all required results files.")
         return
 
     # Create comprehensive plots
-    create_comprehensive_plots(results)
+    create_comprehensive_plots(results, artifacts_directory)
 
     # Print summary
     print_summary(results)
@@ -366,4 +363,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    artifacts_directory = Path("artifacts")
+    artifacts_directory.mkdir(exist_ok=True)
+    main(artifacts_directory)
