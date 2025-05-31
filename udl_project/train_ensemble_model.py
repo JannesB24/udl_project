@@ -1,13 +1,6 @@
-"""
-Ensemble Add-on for Your Original resNetEx.py
-This file ONLY handles the ensemble training and comparison
-Your original train_model.py remains unchanged and is used as-is
-"""
-
 import numpy as np
 import torch
 import torch.nn as nn
-import matplotlib.pyplot as plt
 from datetime import datetime
 import pickle
 
@@ -16,30 +9,46 @@ from udl_project.models.ensemble_model import EnsembleModel
 from pathlib import Path
 
 
-def load_original_results(artifacts_dir: Path):
+# TODO: make a common interface to call the different models!
+def main(artifacts_dir: Path = Path("artifacts")):
+    # TODO: make this otherwise parameterizable: global config?!
+    num_models = 3
+
+    print("ENSEMBLE REGULARIZATION TRAINING")
+    print(f"Using {num_models} ResNet models in ensemble.")
+    print("=" * 60)
+
+    # Train ensemble model
+    train_ensemble_model(artifacts_dir, num_models)
+
+    print("\nENSEMBLE TRAINING COMPLETED!")
+    print("Generated files:")
+    print("  - ../artifacts/ensemble_model.pth")
+    print("  - ../artifacts/ensemble_results.pkl")
+
+
+def load_original_results():
     try:
         # Try to load saved results from original resNetEx.py
-        with open(artifacts_dir / "original_results.pkl", "rb") as f:
+        with open("artifacts/original_results.pkl", "rb") as f:
             return pickle.load(f)
     except FileNotFoundError:
         return None
 
 
-def run_ensemble_only(artifacts_dir: Path):
+def train_ensemble_model(artifacts_dir: Path, num_models: int):
     print("=" * 60)
     print("RUNNING ENSEMBLE RESNET")
     print("=" * 60)
 
     device = torch.device("cpu")
 
-    # Create ensemble model
-    model = EnsembleModel(5, num_models=3)
+    model = EnsembleModel(num_classes=5, num_models=num_models)
     model.to(device)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-    # Same parameters as Sören
     num_epochs = 10
 
     train_losses = np.zeros(num_epochs)
@@ -49,7 +58,7 @@ def run_ensemble_only(artifacts_dir: Path):
 
     print("Training Ensemble ResBlock...")
 
-    # use standard parameters
+    # use standard parameters of the data loader
     dataloader = DataLoaderFlowers.create_dataloader()
 
     for epoch in range(num_epochs):
@@ -61,7 +70,7 @@ def run_ensemble_only(artifacts_dir: Path):
         n_correct_train = 0
         n_total_train = 0
 
-        # Training phase (same structure as Sören)
+        # Training phase
         for images, labels in dataloader.get_train_dataloader():
             images = images.to(device)
             labels = labels.to(device)
@@ -82,7 +91,7 @@ def run_ensemble_only(artifacts_dir: Path):
         train_losses[epoch] = train_loss
         train_accs[epoch] = n_correct_train / n_total_train
 
-        # Validation phase (same structure as Sören)
+        # Validation phase
         model.eval()
         n_correct_val = 0
         n_total_val = 0
@@ -104,7 +113,6 @@ def run_ensemble_only(artifacts_dir: Path):
         val_accs[epoch] = n_correct_val / n_total_val
         duration = datetime.now() - t0
 
-        # Print in same format as Sören
         print(
             f"Epoch [{epoch + 1}/{num_epochs}] - "
             f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_accs[epoch]:.4f} | "
@@ -113,10 +121,7 @@ def run_ensemble_only(artifacts_dir: Path):
         )
 
     # Save ensemble model
-    torch.save(model.state_dict(), artifacts_dir / "ensemble_flower_classification_model.pth")
-    print(
-        "Ensemble model saved as ensemble_flower_classification_model.pth to the artifacts folder."
-    )
+    torch.save(model.state_dict(), artifacts_dir / "ensemble_model.pth")
 
     # Save ensemble results
     ensemble_results = {
@@ -124,132 +129,15 @@ def run_ensemble_only(artifacts_dir: Path):
         "val_losses": val_losses,
         "train_accs": train_accs,
         "val_accs": val_accs,
+        "model_name": "Ensemble ResNet",
     }
 
     with open(artifacts_dir / "ensemble_results.pkl", "wb") as f:
         pickle.dump(ensemble_results, f)
 
-    return ensemble_results
-
-
-def compare_results(original_results, ensemble_results):
-    """
-    Compare original vs ensemble results
-    """
-    print("\n" + "=" * 60)
-    print("COMPARING ORIGINAL vs ENSEMBLE")
-    print("=" * 60)
-
-    # Create comparison plots
-    fig, axes = plt.subplots(2, 2, figsize=(15, 10))
-
-    results = {"Original ResBlock": original_results, "Ensemble ResBlock": ensemble_results}
-
-    # Plot 1: Training Loss
-    axes[0, 0].set_title("Training Loss Comparison", fontweight="bold")
-    for name, data in results.items():
-        axes[0, 0].plot(data["train_losses"], label=name, linewidth=2)
-    axes[0, 0].set_xlabel("Epoch")
-    axes[0, 0].set_ylabel("Loss")
-    axes[0, 0].legend()
-    axes[0, 0].grid(True, alpha=0.3)
-
-    # Plot 2: Validation Loss
-    axes[0, 1].set_title("Validation Loss Comparison", fontweight="bold")
-    for name, data in results.items():
-        axes[0, 1].plot(data["val_losses"], label=name, linewidth=2)
-    axes[0, 1].set_xlabel("Epoch")
-    axes[0, 1].set_ylabel("Loss")
-    axes[0, 1].legend()
-    axes[0, 1].grid(True, alpha=0.3)
-
-    # Plot 3: Training Accuracy
-    axes[1, 0].set_title("Training Accuracy Comparison", fontweight="bold")
-    for name, data in results.items():
-        axes[1, 0].plot(data["train_accs"], label=name, linewidth=2)
-    axes[1, 0].set_xlabel("Epoch")
-    axes[1, 0].set_ylabel("Accuracy")
-    axes[1, 0].legend()
-    axes[1, 0].grid(True, alpha=0.3)
-
-    # Validation Accuracy
-    axes[1, 1].set_title("Validation Accuracy Comparison", fontweight="bold")
-    for name, data in results.items():
-        axes[1, 1].plot(data["val_accs"], label=name, linewidth=2)
-    axes[1, 1].set_xlabel("Epoch")
-    axes[1, 1].set_ylabel("Accuracy")
-    axes[1, 1].legend()
-    axes[1, 1].grid(True, alpha=0.3)
-
-    plt.tight_layout()
-    plt.savefig("original_vs_ensemble_comparison.png", dpi=300, bbox_inches="tight")
-    plt.show()
-
-    # Overfitting?
-    plt.figure(figsize=(10, 6))
-    plt.title("Overfitting Analysis: Train - Validation Accuracy Gap", fontweight="bold")
-
-    for name, data in results.items():
-        overfitting_gap = np.array(data["train_accs"]) - np.array(data["val_accs"])
-        plt.plot(overfitting_gap, label=f"{name} Gap", linewidth=3)
-
-    plt.xlabel("Epoch")
-    plt.ylabel("Train Accuracy - Validation Accuracy")
-    plt.legend()
-    plt.grid(True, alpha=0.3)
-    plt.axhline(y=0, color="black", linestyle="--", alpha=0.5)
-    plt.savefig("overfitting_comparison.png", dpi=300, bbox_inches="tight")
-    plt.show()
-
-    # Print comparison summary
-    orig_gap = original_results["train_accs"][-1] - original_results["val_accs"][-1]
-    ens_gap = ensemble_results["train_accs"][-1] - ensemble_results["val_accs"][-1]
-
-    print("\nCOMPARISON SUMMARY:")
-    print(f"   Original Overfitting Gap:  {orig_gap:.4f}")
-    print(f"   Ensemble Overfitting Gap:  {ens_gap:.4f}")
-    print(f"   Gap Reduction:             {orig_gap - ens_gap:.4f}")
-
-    if ens_gap < orig_gap:
-        improvement = (orig_gap - ens_gap) / orig_gap * 100
-        print(f"Ensemble reduced overfitting by {improvement:.1f}%")
-    else:
-        print("Ensemble did not improve overfitting")
-
-
-def main():
-    artifacts_dir = Path("artifacts")
-    if not artifacts_dir.exists():
-        artifacts_dir.mkdir(parents=True, exist_ok=True)
-
-    print("ENSEMBLE REGULARIZATION EXPERIMENT")
-    print("=" * 60)
-
-    # Check if original results exist
-    original_results = load_original_results(artifacts_dir)
-
-    if original_results is None:
-        print("\n Original results not found!")
-        print("Please run resNetEx.py first, then run this script.")
-        print("\nWorkflow:")
-        print("1. python resNetEx.py          # Run your original code")
-        print("2. python ensemble_addon.py    # Run this ensemble comparison")
-        return
-
-    # Run ensemble training
-    ensemble_results = run_ensemble_only()
-
-    # Compare if we have original results
-    if original_results is not None:
-        compare_results(original_results, ensemble_results)
-
-    print("\n ENSEMBLE EXPERIMENT COMPLETED!")
-    if original_results is not None:
-        print("Generated files:")
-        print("  - ensemble_flower_classification_model.pth")
-        print("  - original_vs_ensemble_comparison.png")
-        print("  - overfitting_comparison.png")
-
 
 if __name__ == "__main__":
-    main()
+    artifacts_dir = Path("artifacts")
+    artifacts_dir.mkdir(exist_ok=True)
+    # TODO: make command line arguments for num_models
+    main(artifacts_dir)

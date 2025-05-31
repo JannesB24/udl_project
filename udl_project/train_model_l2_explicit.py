@@ -1,20 +1,12 @@
 from pathlib import Path
-import pickle
 import numpy as np
 import torch
 import torch.nn as nn
 from datetime import datetime
+import pickle
 
 from udl_project.data_loader_flowers import DataLoaderFlowers
 from udl_project.models.res_block import ResBlock
-
-# Number of epochs for training
-EPOCHS = 10
-
-
-def main(artifacts_dir: Path = Path("artifacts")):
-    # TODO: make a common interface to call the different models!
-    train_model(artifacts_dir=artifacts_dir)
 
 
 def weights_init(layer_in):
@@ -23,33 +15,39 @@ def weights_init(layer_in):
         layer_in.bias.data.fill_(0.0)
 
 
-# TODO: unify the train_* functions, use object orientation?!
-def train_model(artifacts_dir: Path):
+def train_l2_model(artifacts_dir: Path, weight_decay=0.01):
     print("=" * 60)
-    print("TRAINING ORIGINAL RESNET MODEL")
+    print(f"TRAINING L2 REGULARIZED RESNET (weight_decay={weight_decay})")
     print("=" * 60)
+
     device = torch.device("cpu")
 
-    # create model and initialize parameters
-    model = ResBlock(numClasses=5)
+    # Create model exactly the unregularized
+    model = ResBlock(5)
     model.apply(weights_init)
 
-    # choose loss function and optimizer
+    # MAIN DIFFERENCE: Adding weight_decay parameter to optimizer
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    optimizer = torch.optim.Adam(
+        model.parameters(),
+        lr=0.001,
+        weight_decay=weight_decay,  # Explicit L2 regularization
+    )
 
-    # initial tracking variables
-    train_losses = np.zeros(EPOCHS)
-    val_losses = np.zeros(EPOCHS)
-    train_accs = np.zeros(EPOCHS)
-    val_accs = np.zeros(EPOCHS)
+    # Same parameters as original
+    num_epochs = 10
 
-    print("Training Unregularized ResNet...")
+    train_losses = np.zeros(num_epochs)
+    val_losses = np.zeros(num_epochs)
+    train_accs = np.zeros(num_epochs)
+    val_accs = np.zeros(num_epochs)
+
+    print("Training L2 Regularized ResNet...")
 
     # call with standard parameters
     data_loader = DataLoaderFlowers.create_dataloader()
 
-    for epoch in range(EPOCHS):
+    for epoch in range(num_epochs):
         model.train()
         t0 = datetime.now()
 
@@ -58,21 +56,19 @@ def train_model(artifacts_dir: Path):
         n_correct_train = 0
         n_total_train = 0
 
+        # Training phase
         for images, labels in data_loader.get_train_dataloader():
             images = images.to(device)
             labels = labels.to(device)
 
             optimizer.zero_grad()
-
             y_pred = model(images)
             loss = criterion(y_pred, labels)
-
             loss.backward()
             optimizer.step()
 
             train_loss.append(loss.item())
 
-            # Compute training accuracy
             _, predicted_labels = torch.max(y_pred, 1)
             n_correct_train += (predicted_labels == labels).sum().item()
             n_total_train += labels.shape[0]
@@ -80,7 +76,6 @@ def train_model(artifacts_dir: Path):
         train_loss = np.mean(train_loss)
         train_losses[epoch] = train_loss
         train_accs[epoch] = n_correct_train / n_total_train
-        print(train_loss)
 
         # Validation phase
         model.eval()
@@ -93,11 +88,8 @@ def train_model(artifacts_dir: Path):
 
                 y_pred = model(images)
                 loss = criterion(y_pred, labels)
-
-                # Store the validation loss
                 val_loss.append(loss.item())
 
-                # Compute validation accuracy
                 _, predicted_labels = torch.max(y_pred, 1)
                 n_correct_val += (predicted_labels == labels).sum().item()
                 n_total_val += labels.shape[0]
@@ -107,32 +99,52 @@ def train_model(artifacts_dir: Path):
         val_accs[epoch] = n_correct_val / n_total_val
         duration = datetime.now() - t0
 
-        # Print the metrics for the current epoch
+        # Print results
         print(
-            f"Epoch [{epoch + 1}/{EPOCHS}] - "
+            f"Epoch [{epoch + 1}/{num_epochs}] - "
             f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_accs[epoch]:.4f} | "
             f"Val Loss: {val_loss:.4f}, Val Accuracy: {val_accs[epoch]:.4f} | "
             f"Duration: {duration}"
         )
 
-    # Save the model
-    torch.save(model.state_dict(), artifacts_dir / "flower_classification_model.pth")
+    # Save model
+    torch.save(model.state_dict(), artifacts_dir / f"l2_model_wd_{weight_decay}.pth")
 
-    # Save results for comparison
-    original_results = {
+    # Store results
+    l2_results = {
         "train_losses": train_losses,
         "val_losses": val_losses,
         "train_accs": train_accs,
         "val_accs": val_accs,
-        "model_name": "Original ResNet",
+        "weight_decay": weight_decay,
+        "model_name": f"L2 Regularized (wd={weight_decay})",
     }
 
-    with open(artifacts_dir / "original_results.pkl", "wb") as f:
-        pickle.dump(original_results, f)
+    with open(artifacts_dir / "l2_results.pkl", "wb") as f:
+        pickle.dump(l2_results, f)
 
-    print("\nOriginal model training completed!")
-    print(f"Final overfitting gap: {train_accs[-1] - val_accs[-1]:.4f}")
-    print(f"Results saved to {artifacts_dir / 'original_results.pkl'}")
+    # Print summary for this configuration
+    overfitting_gap = train_accs[-1] - val_accs[-1]
+    print("\nL2 Regularized model training completed!")
+    print(f"Final overfitting gap: {overfitting_gap:.4f}")
+    print("Results saved to ../artifacts/l2_results.pkl")
+
+
+def main(artifacts_dir: Path = Path("artifacts")):
+    weight_decay = 0.01
+    print("L2 REGULARIZATION TRAINING")
+    # Weight decay e.g. 0.001, this can be changed to different values that yield different results
+    print(f"Using weight_decay={weight_decay}")
+    print("=" * 60)
+
+    # Train with medium L2 regularization
+    train_l2_model(artifacts_dir, weight_decay=weight_decay)
+
+    print("\nL2 REGULARIZATION TRAINING COMPLETED!")
+    print("Generated files:")
+    # TODO: create single point of reference for path names and so on
+    print("  - ../artifacts/l2_model_wd_0.01.pth")
+    print("  - ../artifacts/l2_results.pkl")
 
 
 if __name__ == "__main__":
