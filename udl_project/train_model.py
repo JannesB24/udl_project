@@ -1,12 +1,11 @@
+from pathlib import Path
 import pickle
 import numpy as np
 import torch
 import torch.nn as nn
 from datetime import datetime
 
-import os
-
-from udl_project import DataLoaderFFSet
+from udl_project.data_loader_flowers import DataLoaderFlowers
 from udl_project.models.res_block import ResBlock
 
 # Number of epochs for training
@@ -19,7 +18,7 @@ def weights_init(layer_in):
         layer_in.bias.data.fill_(0.0)
 
 
-def train_model():
+def train_model(artifacts_dir: Path):
     print("=" * 60)
     print("TRAINING ORIGINAL RESNET MODEL")
     print("=" * 60)
@@ -41,6 +40,10 @@ def train_model():
 
     print("Training Unregularized ResNet...")
 
+    # call with standard parameters
+    data_loader = DataLoaderFlowers.create_dataloader()
+
+
     for epoch in range(EPOCHS):
         model.train()
         t0 = datetime.now()
@@ -50,7 +53,7 @@ def train_model():
         n_correct_train = 0
         n_total_train = 0
 
-        for images, labels in DataLoaderFFSet.train_dataloader_simple:
+        for images, labels in data_loader.get_train_dataloader():
             images = images.to(device)
             labels = labels.to(device)
 
@@ -79,7 +82,7 @@ def train_model():
         n_correct_val = 0
         n_total_val = 0
         with torch.no_grad():
-            for images, labels in DataLoaderFFSet.test_dataloader_simple:
+            for images, labels in data_loader.get_test_dataloader():
                 images = images.to(device)
                 labels = labels.to(device)
 
@@ -107,12 +110,8 @@ def train_model():
             f"Duration: {duration}"
         )
 
-    script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    artifacts_dir = os.path.join(script_dir, "artifacts")
-    os.makedirs(artifacts_dir, exist_ok=True)
-
-    # Save the model using the artifacts_dir variable
-    torch.save(model.state_dict(), os.path.join(artifacts_dir, "original_model.pth"))
+    # Save the model
+    torch.save(model.state_dict(), artifacts_dir / "flower_classification_model.pth")
 
     # Save results for comparison
     original_results = {
@@ -123,13 +122,16 @@ def train_model():
         "model_name": "Original ResNet",
     }
 
-    with open(os.path.join(artifacts_dir, "original_results.pkl"), "wb") as f:
+    with open(artifacts_dir / "original_results.pkl", "wb") as f:
         pickle.dump(original_results, f)
 
     print("\nOriginal model training completed!")
     print(f"Final overfitting gap: {train_accs[-1] - val_accs[-1]:.4f}")
-    print(f"Results saved to {os.path.join(artifacts_dir, 'original_results.pkl')}")
+    print(f"Results saved to {artifacts_dir /'original_results.pkl'}")
 
 
 if __name__ == "__main__":
-    train_model()
+    artifacts_dir = Path("artifacts")
+    artifacts_dir.mkdir(exist_ok=True)
+
+    train_model(artifacts_dir)

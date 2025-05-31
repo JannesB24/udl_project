@@ -3,12 +3,22 @@ import torch
 import torch.nn as nn
 from datetime import datetime
 import pickle
-import os
-from udl_project import DataLoaderFFSet
+
+from udl_project.data_loader_flowers import DataLoaderFlowers
 from udl_project.models.ensemble_model import EnsembleModel
+from pathlib import Path
 
 
-def train_ensemble_model():
+def load_original_results():
+    try:
+        # Try to load saved results from original resNetEx.py
+        with open("artifacts/original_results.pkl", "rb") as f:
+            return pickle.load(f)
+    except FileNotFoundError:
+        return None
+
+
+def train_ensemble_model(artifacts_dir: Path):
     print("=" * 60)
     print("RUNNING ENSEMBLE RESNET")
     print("=" * 60)
@@ -30,6 +40,9 @@ def train_ensemble_model():
 
     print("Training Ensemble ResBlock...")
 
+    # use standard parameters
+    dataloader = DataLoaderFlowers.create_dataloader()
+
     for epoch in range(num_epochs):
         model.train()
         t0 = datetime.now()
@@ -40,7 +53,7 @@ def train_ensemble_model():
         n_total_train = 0
 
         # Training phase
-        for images, labels in DataLoaderFFSet.train_dataloader_simple:
+        for images, labels in dataloader.get_train_dataloader():
             images = images.to(device)
             labels = labels.to(device)
 
@@ -65,7 +78,7 @@ def train_ensemble_model():
         n_correct_val = 0
         n_total_val = 0
         with torch.no_grad():
-            for images, labels in DataLoaderFFSet.test_dataloader_simple:
+            for images, labels in dataloader.get_test_dataloader():
                 images = images.to(device)
                 labels = labels.to(device)
 
@@ -90,10 +103,7 @@ def train_ensemble_model():
         )
 
     # Save ensemble model
-    script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    artifacts_dir = os.path.join(script_dir, "artifacts")
-    os.makedirs(artifacts_dir, exist_ok=True)
-    torch.save(model.state_dict(), os.path.join(artifacts_dir, "ensemble_model.pth"))
+    torch.save(model.state_dict(), artifacts_dir / "ensemble_model.pth")
 
     # Save ensemble results
     ensemble_results = {
@@ -104,13 +114,17 @@ def train_ensemble_model():
         "model_name": "Ensemble ResNet",
     }
 
-    with open(os.path.join(artifacts_dir, "ensemble_results.pkl"), "wb") as f:
+    with open(artifacts_dir / "ensemble_results.pkl", "wb") as f:
         pickle.dump(ensemble_results, f)
 
     return ensemble_results
 
 
 def main():
+    artifacts_dir = Path("artifacts")
+    if not artifacts_dir.exists():
+        artifacts_dir.mkdir(parents=True, exist_ok=True)
+
     print("ENSEMBLE REGULARIZATION TRAINING")
     print("Using 3 ResNet models in ensemble")
     print("=" * 60)
