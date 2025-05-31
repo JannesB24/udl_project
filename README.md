@@ -12,7 +12,7 @@ This repository was created for the seminar "[Understanding Deep Learning](https
 # What this repository shows
 This project demonstrates a small residual network (ResNet) that initially struggles to accurately classify the [dataset mentioned above](#prerequisites). Various regularization techniques are applied and compared to improve its performance. The goal is to showcase a comprehensive comparison of different regularization techniques and their impact on the model's performance.
 
-✅ L2 Regularization 
+✅ L2 Regularization
 👷 Early Stopping
 ✅ Ensembling (Section 9.3.2 from [book](https://udlbook.github.io/udlbook/))
 👷 Dropout

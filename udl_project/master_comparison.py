@@ -1,8 +1,11 @@
 import matplotlib
 
+from udl_project.plotter import plot
+from udl_project.train_model import main as main_res
+from udl_project.train_model_l2_explicit import main as main_l2
+from udl_project.train_ensemble_model import main as main_ensemble
+
 matplotlib.use("Agg")
-import subprocess
-import sys
 
 
 def run_training_scripts():
@@ -10,28 +13,19 @@ def run_training_scripts():
     print("RUNNING ALL TRAINING SCRIPTS")
     print("=" * 60)
 
+    # These function should only accept the artifact path for now. In the future create a proper interface
     scripts = [
-        ("udl_project/train_model.py", "Original ResNet"),
-        ("udl_project/train_model_l2_explicit.py", "L2 Regularized ResNet"),
-        ("udl_project/train_ensemble_model.py", "Ensemble ResNet"),
+        (main_res, "Original ResNet"),
+        (main_l2, "L2 Regularized ResNet"),
+        (main_ensemble, "Ensemble ResNet"),
     ]
 
-    for script, name in scripts:
+    for train_callable, name in scripts:
         print(f"\n  Running {name}...")
-        try:
-            result = subprocess.run([sys.executable, script], check=True)
-            print(f"{name} completed successfully")
-        except subprocess.CalledProcessError as e:
-            print(f"Error running {script}:")
-            print(e.stdout)
-            print(e.stderr)
-            return False
-        except FileNotFoundError:
-            print(f"Script {script} not found")
-            return False
+        train_callable()
+        print(f"{name} completed successfully")
 
     print("\nAll training scripts completed!")
-    return True
 
 
 def main():
@@ -39,21 +33,12 @@ def main():
     print("=" * 80)
 
     # Run all training scripts
-    if not run_training_scripts():
-        print("Training failed. Please check errors above.")
-        return
+    run_training_scripts()
 
     # Run the plotting script
     print("\nRunning plotting script...")
-    try:
-        result = subprocess.run([sys.executable, "plot.py"], check=True)
-        print("Plotting completed successfully")
-    except subprocess.CalledProcessError:
-        print("Error running plotting script")
-        return
-    except FileNotFoundError:
-        print("plot.py not found")
-        return
+    plot()
+    print("Plotting completed successfully")
 
 
 if __name__ == "__main__":

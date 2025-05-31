@@ -9,7 +9,12 @@ from udl_project.data_loader_flowers import DataLoaderFlowers
 from udl_project.models.res_block import ResBlock
 
 # Number of epochs for training
-EPOCHS = 10
+EPOCHS = 1
+
+
+def main(artifacts_dir: Path = Path("artifacts")):
+    # TODO: make a common interface to call the different models!
+    train_model(artifacts_dir=artifacts_dir)
 
 
 def weights_init(layer_in):
@@ -18,6 +23,7 @@ def weights_init(layer_in):
         layer_in.bias.data.fill_(0.0)
 
 
+# TODO: unify the train_* functions, use object orientation?!
 def train_model(artifacts_dir: Path):
     print("=" * 60)
     print("TRAINING ORIGINAL RESNET MODEL")
@@ -25,7 +31,7 @@ def train_model(artifacts_dir: Path):
     device = torch.device("cpu")
 
     # create model and initialize parameters
-    model = ResBlock(5)
+    model = ResBlock(numClasses=5)
     model.apply(weights_init)
 
     # choose loss function and optimizer
@@ -42,7 +48,6 @@ def train_model(artifacts_dir: Path):
 
     # call with standard parameters
     data_loader = DataLoaderFlowers.create_dataloader()
-
 
     for epoch in range(EPOCHS):
         model.train()
@@ -127,11 +132,11 @@ def train_model(artifacts_dir: Path):
 
     print("\nOriginal model training completed!")
     print(f"Final overfitting gap: {train_accs[-1] - val_accs[-1]:.4f}")
-    print(f"Results saved to {artifacts_dir /'original_results.pkl'}")
+    print(f"Results saved to {artifacts_dir / 'original_results.pkl'}")
 
 
 if __name__ == "__main__":
     artifacts_dir = Path("artifacts")
     artifacts_dir.mkdir(exist_ok=True)
 
-    train_model(artifacts_dir)
+    main(artifacts_dir)

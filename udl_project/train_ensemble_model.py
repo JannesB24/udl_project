@@ -9,6 +9,24 @@ from udl_project.models.ensemble_model import EnsembleModel
 from pathlib import Path
 
 
+# TODO: make a common interface to call the different models!
+def main(artifacts_dir: Path = Path("artifacts")):
+    # TODO: make this otherwise parameterizable: global config?!
+    num_models = 3
+
+    print("ENSEMBLE REGULARIZATION TRAINING")
+    print(f"Using {num_models} ResNet models in ensemble.")
+    print("=" * 60)
+
+    # Train ensemble model
+    train_ensemble_model(artifacts_dir, num_models)
+
+    print("\nENSEMBLE TRAINING COMPLETED!")
+    print("Generated files:")
+    print("  - ../artifacts/ensemble_model.pth")
+    print("  - ../artifacts/ensemble_results.pkl")
+
+
 def load_original_results():
     try:
         # Try to load saved results from original resNetEx.py
@@ -18,20 +36,20 @@ def load_original_results():
         return None
 
 
-def train_ensemble_model(artifacts_dir: Path):
+def train_ensemble_model(artifacts_dir: Path, num_models: int):
     print("=" * 60)
     print("RUNNING ENSEMBLE RESNET")
     print("=" * 60)
 
     device = torch.device("cpu")
 
-    model = EnsembleModel(5, num_models=3)
+    model = EnsembleModel(num_classes=5, num_models=num_models)
     model.to(device)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-    num_epochs = 10
+    num_epochs = 1
 
     train_losses = np.zeros(num_epochs)
     val_losses = np.zeros(num_epochs)
@@ -40,7 +58,7 @@ def train_ensemble_model(artifacts_dir: Path):
 
     print("Training Ensemble ResBlock...")
 
-    # use standard parameters
+    # use standard parameters of the data loader
     dataloader = DataLoaderFlowers.create_dataloader()
 
     for epoch in range(num_epochs):
@@ -117,26 +135,9 @@ def train_ensemble_model(artifacts_dir: Path):
     with open(artifacts_dir / "ensemble_results.pkl", "wb") as f:
         pickle.dump(ensemble_results, f)
 
-    return ensemble_results
-
-
-def main():
-    artifacts_dir = Path("artifacts")
-    if not artifacts_dir.exists():
-        artifacts_dir.mkdir(parents=True, exist_ok=True)
-
-    print("ENSEMBLE REGULARIZATION TRAINING")
-    print("Using 3 ResNet models in ensemble")
-    print("=" * 60)
-
-    # Train ensemble model
-    ensemble_results = train_ensemble_model()
-
-    print("\nENSEMBLE TRAINING COMPLETED!")
-    print("Generated files:")
-    print("  - ../artifacts/ensemble_model.pth")
-    print("  - ../artifacts/ensemble_results.pkl")
-
 
 if __name__ == "__main__":
-    main()
+    artifacts_dir = Path("artifacts")
+    artifacts_dir.mkdir(exist_ok=True)
+    # TODO: make command line arguments for num_models
+    main(artifacts_dir)

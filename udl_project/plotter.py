@@ -15,8 +15,8 @@ def load_results(artifacts_directory: Path):
         with open(artifacts_directory / "original_results.pkl", "rb") as f:
             results["Original ResNet"] = pickle.load(f)
         print("Loaded original results")
-    except:
-        print("Could not load original results")
+    except Exception as e:
+        print(f"Could not load original results: {e}")
         return None
 
     # Load L2 results
@@ -24,8 +24,8 @@ def load_results(artifacts_directory: Path):
         with open(artifacts_directory / "l2_results.pkl", "rb") as f:
             results["L2 Regularized ResNet"] = pickle.load(f)
         print("Loaded L2 results")
-    except:
-        print("Could not load L2 results")
+    except Exception as e:
+        print(f"Could not load L2 results: {e}")
         return None
 
     # Load ensemble results
@@ -33,8 +33,8 @@ def load_results(artifacts_directory: Path):
         with open(artifacts_directory / "ensemble_results.pkl", "rb") as f:
             results["Ensemble ResNet"] = pickle.load(f)
         print("Loaded ensemble results")
-    except:
-        print("Could not load ensemble results")
+    except Exception as e:
+        print(f"Could not load ensemble results: {e}")
         return None
 
     return results
@@ -285,7 +285,6 @@ def create_comprehensive_plots(results, artifacts_directory: Path):
             summary_text += f"  Overfitting Gap: {gap:.3f} ({gap_reduction:.1f}% reduction)\n\n"
 
     # Find best method
-    best_gap = min(data["train_accs"][-1] - data["val_accs"][-1] for data in results.values())
     best_method = min(results.items(), key=lambda x: x[1]["train_accs"][-1] - x[1]["val_accs"][-1])[
         0
     ]
@@ -338,7 +337,7 @@ def print_summary(results):
     print(f"   Overfitting gap: {gaps[best_model]:.4f}")
 
 
-def main(artifacts_directory: Path):
+def plot(artifacts_directory: Path = Path("artifacts")):
     print("COMPREHENSIVE UDL REGULARIZATION COMPARISON PLOTTER")
     print("=" * 60)
 
@@ -365,4 +364,4 @@ def main(artifacts_directory: Path):
 if __name__ == "__main__":
     artifacts_directory = Path("artifacts")
     artifacts_directory.mkdir(exist_ok=True)
-    main(artifacts_directory)
+    plot(artifacts_directory)

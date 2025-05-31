@@ -1,11 +1,11 @@
+from pathlib import Path
 import numpy as np
 import torch
 import torch.nn as nn
 from datetime import datetime
 import pickle
-import os
 
-from udl_project import DataLoaderFFSet
+from udl_project.data_loader_flowers import DataLoaderFlowers
 from udl_project.models.res_block import ResBlock
 
 
@@ -15,7 +15,7 @@ def weights_init(layer_in):
         layer_in.bias.data.fill_(0.0)
 
 
-def train_l2_model(weight_decay=0.01):
+def train_l2_model(artifacts_dir: Path, weight_decay=0.01):
     print("=" * 60)
     print(f"TRAINING L2 REGULARIZED RESNET (weight_decay={weight_decay})")
     print("=" * 60)
@@ -35,7 +35,7 @@ def train_l2_model(weight_decay=0.01):
     )
 
     # Same parameters as original
-    num_epochs = 10
+    num_epochs = 1
 
     train_losses = np.zeros(num_epochs)
     val_losses = np.zeros(num_epochs)
@@ -43,6 +43,9 @@ def train_l2_model(weight_decay=0.01):
     val_accs = np.zeros(num_epochs)
 
     print("Training L2 Regularized ResNet...")
+
+    # call with standard parameters
+    data_loader = DataLoaderFlowers.create_dataloader()
 
     for epoch in range(num_epochs):
         model.train()
@@ -54,7 +57,7 @@ def train_l2_model(weight_decay=0.01):
         n_total_train = 0
 
         # Training phase
-        for images, labels in DataLoaderFFSet.train_dataloader_simple:
+        for images, labels in data_loader.get_train_dataloader():
             images = images.to(device)
             labels = labels.to(device)
 
@@ -79,7 +82,7 @@ def train_l2_model(weight_decay=0.01):
         n_correct_val = 0
         n_total_val = 0
         with torch.no_grad():
-            for images, labels in DataLoaderFFSet.test_dataloader_simple:
+            for images, labels in data_loader.get_test_dataloader():
                 images = images.to(device)
                 labels = labels.to(device)
 
@@ -104,12 +107,8 @@ def train_l2_model(weight_decay=0.01):
             f"Duration: {duration}"
         )
 
-    script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    artifacts_dir = os.path.join(script_dir, "artifacts")
-    os.makedirs(artifacts_dir, exist_ok=True)
-
     # Save model
-    torch.save(model.state_dict(), os.path.join(artifacts_dir, f"l2_model_wd_{weight_decay}.pth"))
+    torch.save(model.state_dict(), artifacts_dir / f"l2_model_wd_{weight_decay}.pth")
 
     # Store results
     l2_results = {
@@ -121,7 +120,7 @@ def train_l2_model(weight_decay=0.01):
         "model_name": f"L2 Regularized (wd={weight_decay})",
     }
 
-    with open(os.path.join(artifacts_dir, "l2_results.pkl"), "wb") as f:
+    with open(artifacts_dir / "l2_results.pkl", "wb") as f:
         pickle.dump(l2_results, f)
 
     # Print summary for this configuration
@@ -130,23 +129,26 @@ def train_l2_model(weight_decay=0.01):
     print(f"Final overfitting gap: {overfitting_gap:.4f}")
     print("Results saved to ../artifacts/l2_results.pkl")
 
-    return l2_results
 
-
-def main():
+def main(artifacts_dir: Path = Path("artifacts")):
+    weight_decay = 0.01
     print("L2 REGULARIZATION TRAINING")
-    # Weight decay = 0.001, this can be changed to different values that yield different results
-    print("Using weight_decay=0.001")
+    # Weight decay e.g. 0.001, this can be changed to different values that yield different results
+    print(f"Using weight_decay={weight_decay}")
     print("=" * 60)
 
     # Train with medium L2 regularization
-    l2_results = train_l2_model(weight_decay=0.01)
+    train_l2_model(artifacts_dir, weight_decay=weight_decay)
 
     print("\nL2 REGULARIZATION TRAINING COMPLETED!")
     print("Generated files:")
+    # TODO: create single point of reference for path names and so on
     print("  - ../artifacts/l2_model_wd_0.01.pth")
     print("  - ../artifacts/l2_results.pkl")
 
 
 if __name__ == "__main__":
-    main()
+    artifacts_dir = Path("artifacts")
+    artifacts_dir.mkdir(exist_ok=True)
+
+    main(artifacts_dir)
