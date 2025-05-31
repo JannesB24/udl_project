@@ -59,8 +59,9 @@ To set up the project on Windows, see the instructions in the [Code Setup](#code
 
 ## Running the Code
 In the `udl_project` folder you find files starting with `train_`. These are the entry points and can be started with:
+
 ``` bash
-python train_model.py
+python -m udl_project.train_model
 ```
 
 ## AHHHHHH
