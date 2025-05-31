@@ -120,4 +120,3 @@ GitHub Copilot is being used in this project for the following purposes:
 - Support with arising bugs
 
 The idea and the work on the code itself did not stem from GitHub copilot and is the work of the authors.
-
