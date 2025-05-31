@@ -13,18 +13,19 @@ import pickle
 
 import DataLoaderFFSet
 from udl_project.models.ensemble_model import EnsembleModel
+from pathlib import Path
 
 
-def load_original_results():
+def load_original_results(artifacts_dir: Path):
     try:
         # Try to load saved results from original resNetEx.py
-        with open("artifacts/original_results.pkl", "rb") as f:
+        with open(artifacts_dir / "original_results.pkl", "rb") as f:
             return pickle.load(f)
     except FileNotFoundError:
         return None
 
 
-def run_ensemble_only():
+def run_ensemble_only(artifacts_dir: Path):
     print("=" * 60)
     print("RUNNING ENSEMBLE RESNET")
     print("=" * 60)
@@ -109,7 +110,7 @@ def run_ensemble_only():
         )
 
     # Save ensemble model
-    torch.save(model.state_dict(), "artifacts/ensemble_flower_classification_model.pth")
+    torch.save(model.state_dict(), artifacts_dir / "ensemble_flower_classification_model.pth")
     print(
         "Ensemble model saved as ensemble_flower_classification_model.pth to the artifacts folder."
     )
@@ -122,7 +123,7 @@ def run_ensemble_only():
         "val_accs": val_accs,
     }
 
-    with open("artifacts/ensemble_results.pkl", "wb") as f:
+    with open(artifacts_dir / "ensemble_results.pkl", "wb") as f:
         pickle.dump(ensemble_results, f)
 
     return ensemble_results
@@ -214,11 +215,15 @@ def compare_results(original_results, ensemble_results):
 
 
 def main():
+    artifacts_dir = Path("artifacts")
+    if not artifacts_dir.exists():
+        artifacts_dir.mkdir(parents=True, exist_ok=True)
+
     print("ENSEMBLE REGULARIZATION EXPERIMENT")
     print("=" * 60)
 
     # Check if original results exist
-    original_results = load_original_results()
+    original_results = load_original_results(artifacts_dir)
 
     if original_results is None:
         print("\n Original results not found!")
