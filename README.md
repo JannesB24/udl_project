@@ -67,7 +67,7 @@ python -m udl_project.train_model
 ## AHHHHHH
 To setup the project manually follow these instructions:
 ```bash
-python3 -m venv .venv
+python -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
 pip install -r infrastructure/requirements.txt
@@ -102,6 +102,7 @@ make run-pc
 ```
 
 To set up the project on Windows, see the instructions in the [Development Setup](#development-setup) section above.
+
 ## Help wanted for Windows setup
 If you looped through the setup still searching for a Windows setup you found the break and land here.
 
@@ -111,7 +112,6 @@ In case you are interested, look for the maintainer names on studip (no e-mails 
 We take the feedback, that it probably won't work on Windows.
 
 # AI usage disclaimer
-
 GitHub Copilot is being used in this project for the following purposes:
 
 - Automatically reviewing Pull Requests, creating commit messages, descriptions.
