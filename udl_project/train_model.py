@@ -3,9 +3,9 @@ import pickle
 import numpy as np
 import torch
 import torch.nn as nn
-from udl_project import DataLoaderFFSet
 from datetime import datetime
 
+from udl_project.data_loader_flowers import DataLoaderFlowers
 from udl_project.models.res_block import ResBlock
 
 # Number of epochs for training
@@ -35,6 +35,9 @@ def train_model(artifacts_dir: Path):
     train_accs = np.zeros(EPOCHS)
     val_accs = np.zeros(EPOCHS)
 
+    # call with standard parameters
+    data_loader = DataLoaderFlowers.create_dataloader()
+
     for epoch in range(EPOCHS):
         model.train()
         t0 = datetime.now()
@@ -44,7 +47,7 @@ def train_model(artifacts_dir: Path):
         n_correct_train = 0
         n_total_train = 0
 
-        for images, labels in DataLoaderFFSet.train_dataloader_simple:
+        for images, labels in data_loader.get_train_dataloader():
             images = images.to(device)
             labels = labels.to(device)
 
@@ -73,7 +76,7 @@ def train_model(artifacts_dir: Path):
         n_correct_val = 0
         n_total_val = 0
         with torch.no_grad():
-            for images, labels in DataLoaderFFSet.test_dataloader_simple:
+            for images, labels in data_loader.get_test_dataloader():
                 images = images.to(device)
                 labels = labels.to(device)
 
