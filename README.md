@@ -57,6 +57,12 @@ This creates a local virtual environment (.venv) and installs the required depen
 
 To set up the project on Windows, see the instructions in the [Code Setup](#code-setup) section above.
 
+## Running the Code
+In the `udl_project` folder you find files starting with `train_`. These are the entry points and can be started with:
+``` bash
+python train_model.py
+```
+
 ## AHHHHHH
 To setup the project manually follow these instructions:
 ```bash
