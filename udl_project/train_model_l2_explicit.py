@@ -35,7 +35,7 @@ def train_l2_model(artifacts_dir: Path, weight_decay=0.01):
     )
 
     # Same parameters as original
-    num_epochs = 1
+    num_epochs = 10
 
     train_losses = np.zeros(num_epochs)
     val_losses = np.zeros(num_epochs)

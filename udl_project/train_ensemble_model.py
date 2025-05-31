@@ -49,7 +49,7 @@ def train_ensemble_model(artifacts_dir: Path, num_models: int):
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-    num_epochs = 1
+    num_epochs = 10
 
     train_losses = np.zeros(num_epochs)
     val_losses = np.zeros(num_epochs)

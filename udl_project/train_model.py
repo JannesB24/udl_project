@@ -9,7 +9,7 @@ from udl_project.data_loader_flowers import DataLoaderFlowers
 from udl_project.models.res_block import ResBlock
 
 # Number of epochs for training
-EPOCHS = 1
+EPOCHS = 10
 
 
 def main(artifacts_dir: Path = Path("artifacts")):
