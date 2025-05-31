@@ -4,6 +4,12 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-0C3C4C.svg)](https://github.com/astral-sh/ruff)
 
+> **Note:** This project requires **Python 3.11** or higher.
+
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-0C3C4C.svg)](https://github.com/astral-sh/ruff)
+
 # udl_project
 ⚒️ *Work In Progress*
 
