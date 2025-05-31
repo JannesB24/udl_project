@@ -106,7 +106,7 @@ To set up the project on Windows, see the instructions in the [Development Setup
 If you looped through the setup still searching for a Windows setup you found the break and land here.
 
 If you really are interested in using Windows (my sincerest condolences or well AMD GPU are no fun in WSL either) and use python on Windows and manage to get the repository running, please help us out by contributing to the project yourself.
-In case you are interested, look for the maintainer names on studip (no e-mails in repos 🤐) and contact them ot get access.
+In case you are interested, look for the maintainer names on studip (no e-mails in repos 🤐) and contact them to get access.
 
 We take the feedback, that it probably won't work on Windows.
 
