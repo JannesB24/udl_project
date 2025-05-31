@@ -1,3 +1,4 @@
+from pathlib import Path
 import pickle
 import numpy as np
 import torch
@@ -17,7 +18,7 @@ def weights_init(layer_in):
         layer_in.bias.data.fill_(0.0)
 
 
-def train_model():
+def train_model(artifacts_dir: Path):
     device = torch.device("cpu")
 
     # create model and initialize parameters
@@ -101,7 +102,7 @@ def train_model():
         )
 
     # Optionally, save the model after training
-    torch.save(model.state_dict(), "artifacts/flower_classification_model.pth")
+    torch.save(model.state_dict(), artifacts_dir / "flower_classification_model.pth")
 
     # Save results for comparison
     original_results = {
@@ -111,9 +112,13 @@ def train_model():
         "val_accs": val_accs,
     }
 
-    with open("artifacts/original_results.pkl", "wb") as f:
+    with open(artifacts_dir / "original_results.pkl", "wb") as f:
         pickle.dump(original_results, f)
 
 
 if __name__ == "__main__":
-    train_model()
+    artifacts_dir = Path("artifacts")
+    if not artifacts_dir.exists():
+        artifacts_dir.mkdir(parents=True, exist_ok=True)
+
+    train_model(artifacts_dir)
