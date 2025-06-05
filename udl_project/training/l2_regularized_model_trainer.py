@@ -13,14 +13,13 @@ from udl_project.utils.weights import weights_init
 
 class L2RegularizedModelTrainer(Trainer):
     def __init__(self, weight_decay: float, *, epochs: int):
-        super.__init__()
+        super().__init__()
 
         self.weight_decay = weight_decay
         self.epochs = epochs
 
     def train(self):
         print("L2 REGULARIZATION TRAINING")
-        # Weight decay e.g. 0.001, this can be changed to different values that yield different results
         print(f"Using weight_decay={self.weight_decay}")
         print("=" * 60)
 
