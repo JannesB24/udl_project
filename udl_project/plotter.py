@@ -328,13 +328,13 @@ def plot():
     print("=" * 60)
 
     # Load results
-    results = load_results(config.ARTIFACTS_DIR)
+    results = load_results()
     if results is None:
         print("Could not load all required results files.")
         return
 
     # Create comprehensive plots
-    create_comprehensive_plots(results, config.ARTIFACTS_DIR)
+    create_comprehensive_plots(results)
 
     # Print summary
     print_summary(results)
