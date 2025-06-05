@@ -10,20 +10,21 @@
 This repository was created for the seminar "[Understanding Deep Learning](https://udlbook.github.io/udlbook/)" which took place in the summer term of 2025 at the University of Osnabrück.
 
 # What this repository shows
-This project demonstrates a small residual network (ResNet) that initially struggles to accurately classify the [dataset mentioned above](#prerequisites). Various regularization techniques are applied and compared to improve its performance. The goal is to showcase a comprehensive comparison of different regularization techniques and their impact on the model's performance.
+This project demonstrates a small residual network (ResNet) that initially struggles to accurately classify the dataset mentioned in the [prerequisites](#prerequisites). Various regularization techniques are applied and compared to improve its performance. The goal is to showcase a comprehensive comparison of different regularization techniques and their impact on the model's performance.
 
-✅ L2 Regularization (Section 9.1.2 from [book](https://udlbook.github.io/udlbook/))
-👷 Early Stopping
-✅ Ensembling (Section 9.3.2 from [book](https://udlbook.github.io/udlbook/))
-👷 Dropout
-👷 Applying noise
-👷 ...
+- ✅ **L2 Regularization** (Section 9.1.2 from [book](https://udlbook.github.io/udlbook/))
+- 👷 **Early Stopping**
+- ✅ **Ensembling** (Section 9.3.2 from [book](https://udlbook.github.io/udlbook/))
+- 👷 **Dropout**
+- 👷 **Applying noise**
+- 👷 **...**
 
 # Prerequisites
 Download [this dataset from Kaggle](https://www.kaggle.com/datasets/lara311/flowers-five-classes).
-The dataset itself must be downloaded by each user themselves, since it is not included in this repository for licensing reasons. The dataset must be present next to the project folder `udl_project` in the root directory of the project (`data\train\[label]`, e.g. daisy or rose).
+Each user must download the dataset themselves, as it is not included in this repository for licensing reasons. The dataset must be present next to the project folder (`udl_project`) in the root directory of the project (`data/train/[label]`, e.g., daisy or rose).
 
 ## Project Setup
+<pre>
 .
 ├── Makefile (*project setup on Linux based systems*)
 ├── README.md
@@ -35,16 +36,16 @@ The dataset itself must be downloaded by each user themselves, since it is not i
 │   └── requirements.txt
 ├── pyproject.toml
 └── udl_project (source code)
+</pre>
 
-
-To create tree view run:
+To create the tree view, run:
 ```bash
 tree -I '.*|*data*'
 ```
 Ignoring hidden and explicitly named files.
 
 # Code Setup
-We strongly recommend a Linux based system. If you are using Windows consider [installing WSL](https://learn.microsoft.com/de-de/windows/wsl/install) to use a Linux subsystem on Windows. We suggest using the latest Ubuntu.
+We strongly recommend a Linux-based system. If you are using Windows, consider [installing WSL](https://learn.microsoft.com/de-de/windows/wsl/install) to use a Linux subsystem on Windows. We suggest using the latest Ubuntu.
 
 ✅ Make should come pre-installed.
 
@@ -58,16 +59,16 @@ This creates a local virtual environment (.venv) and installs the required depen
 To set up the project on Windows, see the instructions in the [Code Setup](#code-setup) section above.
 
 ## Running the Code
-In the `udl_project` folder you find files starting with `train_`. These are the entry points and can be started with:
+The project can be executed by running the `udl_project/master_comparison.py` script.
 
 ``` bash
-python -m udl_project.train_model
+python -m udl_project.master_comparison
 ```
 
-## AHHHHHH
-To setup the project manually follow these instructions:
+## Troubleshooting (If Nothing Works)
+If the convenience setup does not work, you can set up the project manually by following these instructions:
 ```bash
-python -m venv .venv
+python -m venv .venv # assuming python is installed properly
 source .venv/bin/activate
 pip install --upgrade pip
 pip install -r infrastructure/requirements.txt
@@ -78,7 +79,7 @@ We strongly recommend a Linux based system. If you are using Windows consider [i
 
 ✅ Make should come pre-installed.
 
-🛠️ Install `uv` using [pipx as described in the official documentation](https://docs.astral.sh/uv/getting-started/installation/#pypi).
+🛠️ Install `uv` using [pipx](https://docs.astral.sh/uv/getting-started/installation/#pypi) as described in the official documentation.
 
 🚀 To set up the project, execute:
 ```bash
@@ -104,12 +105,11 @@ make run-pc
 To set up the project on Windows, see the instructions in the [Development Setup](#development-setup) section above.
 
 ## Help wanted for Windows setup
-If you looped through the setup still searching for a Windows setup you found the break and land here.
+If you have gone through the setup and are still searching for a Windows solution, you have found the right place.
 
-If you really are interested in using Windows (my sincerest condolences or well AMD GPU are no fun in WSL either) and use python on Windows and manage to get the repository running, please help us out by contributing to the project yourself.
-In case you are interested, look for the maintainer names on studip (no e-mails in repos 🤐) and contact them to get access.
+If you are truly interested in using Windows (my sincerest condolences, though AMD GPUs are also challenging in WSL) and manage to get the repository running, please help us by contributing to the project. If interested, look for the maintainer names on studip (no emails in repos 🤐) and contact them to get access.
 
-We take the feedback, that it probably won't work on Windows.
+We acknowledge the feedback that it probably will not work on Windows.
 
 # AI usage disclaimer
 GitHub Copilot is being used in this project for the following purposes:
