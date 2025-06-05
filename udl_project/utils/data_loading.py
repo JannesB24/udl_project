@@ -4,8 +4,7 @@ from typing import Any
 from udl_project import config
 
 
-# "original_results.pkl"
-def load_pickle(file_name: str) -> Any:
+def load_pickled_artifacts(relative_file_name: str) -> Any:
     """
     Load a pickle file from the artifacts directory.
 
@@ -17,5 +16,5 @@ def load_pickle(file_name: str) -> Any:
     """
     artifacts_dir = config.ARTIFACTS_DIR
 
-    with open(artifacts_dir / file_name, "rb") as f:
+    with open(artifacts_dir / relative_file_name, "rb") as f:
         return pickle.load(f)

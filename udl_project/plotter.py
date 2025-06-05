@@ -1,47 +1,33 @@
-import pickle
 import matplotlib
+
+from udl_project import config
+from udl_project.utils.data_loading import load_pickled_artifacts
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
-from pathlib import Path
 
 
-def load_results(artifacts_directory: Path):
+def load_results():
     results = {}
 
     # Load original results
-    try:
-        with open(artifacts_directory / "original_results.pkl", "rb") as f:
-            results["Original ResNet"] = pickle.load(f)
-        print("Loaded original results")
-    except Exception as e:
-        print(f"Could not load original results: {e}")
-        return None
+    results["Original ResNet"] = load_pickled_artifacts("original_results.pkl")
+    print("Loaded original results")
 
     # Load L2 results
-    try:
-        with open(artifacts_directory / "l2_results.pkl", "rb") as f:
-            results["L2 Regularized ResNet"] = pickle.load(f)
-        print("Loaded L2 results")
-    except Exception as e:
-        print(f"Could not load L2 results: {e}")
-        return None
+    results["L2 Regularized ResNet"] = load_pickled_artifacts("l2_results.pkl")
+    print("Loaded L2 results")
 
     # Load ensemble results
-    try:
-        with open(artifacts_directory / "ensemble_results.pkl", "rb") as f:
-            results["Ensemble ResNet"] = pickle.load(f)
-        print("Loaded ensemble results")
-    except Exception as e:
-        print(f"Could not load ensemble results: {e}")
-        return None
+    results["Ensemble ResNet"] = load_pickled_artifacts("ensemble_results.pkl")
+    print("Loaded ensemble results")
 
     return results
 
 
-def create_comprehensive_plots(results, artifacts_directory: Path):
-    plots_path = artifacts_directory / "plots"
+def create_comprehensive_plots(results):
+    plots_path = config.ARTIFACTS_DIR / "plots"
     plots_path.mkdir(exist_ok=True)
 
     print("\nCreating comprehensive comparison plots...")
@@ -337,18 +323,18 @@ def print_summary(results):
     print(f"   Overfitting gap: {gaps[best_model]:.4f}")
 
 
-def plot(artifacts_directory: Path = Path("artifacts")):
+def plot():
     print("COMPREHENSIVE UDL REGULARIZATION COMPARISON PLOTTER")
     print("=" * 60)
 
     # Load results
-    results = load_results(artifacts_directory)
+    results = load_results(config.ARTIFACTS_DIR)
     if results is None:
         print("Could not load all required results files.")
         return
 
     # Create comprehensive plots
-    create_comprehensive_plots(results, artifacts_directory)
+    create_comprehensive_plots(results, config.ARTIFACTS_DIR)
 
     # Print summary
     print_summary(results)
@@ -362,6 +348,4 @@ def plot(artifacts_directory: Path = Path("artifacts")):
 
 
 if __name__ == "__main__":
-    artifacts_directory = Path("artifacts")
-    artifacts_directory.mkdir(exist_ok=True)
-    plot(artifacts_directory)
+    plot()
