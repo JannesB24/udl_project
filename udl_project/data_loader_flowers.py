@@ -24,6 +24,7 @@ class DataLoaderFlowers:
         self.train_data, self.test_data = random_split(dataset, [train_size, test_size])
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.num_classes = len(dataset.classes)
 
     def get_test_dataloader(self) -> DataLoader:
         """Creates a DataLoader for the test dataset.

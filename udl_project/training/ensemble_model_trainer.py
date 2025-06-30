@@ -126,3 +126,11 @@ class EnsembleModelTrainer(Trainer):
 
         with open(config.ARTIFACTS_DIR / "ensemble_results.pkl", "wb") as f:
             pickle.dump(ensemble_results, f)
+
+
+if __name__ == "__main__":
+    # Example usage
+    num_models = 5  # Example number of models in the ensemble
+    epochs = 25  # Example number of training epochs
+    trainer = EnsembleModelTrainer(num_models=num_models, epochs=epochs)
+    trainer.train()

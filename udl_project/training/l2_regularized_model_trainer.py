@@ -6,7 +6,7 @@ import pickle
 
 from udl_project import config
 from udl_project.data_loader_flowers import DataLoaderFlowers
-from udl_project.models.res_block import ResBlock
+from udl_project.models.res_net import ResNet
 from udl_project.training.abstract_trainer import Trainer
 from udl_project.utils.weights import weights_init
 
@@ -39,7 +39,7 @@ class L2RegularizedModelTrainer(Trainer):
         device = torch.device("cpu")
 
         # Create model exactly the unregularized
-        model = ResBlock(5)
+        model = ResNet(num_classes=5)
         model.apply(weights_init)
 
         # MAIN DIFFERENCE: Adding weight_decay parameter to optimizer
@@ -140,3 +140,10 @@ class L2RegularizedModelTrainer(Trainer):
         print("\nL2 Regularized model training completed!")
         print(f"Final overfitting gap: {overfitting_gap:.4f}")
         print("Results saved to ../artifacts/l2_results.pkl")
+
+
+if __name__ == "__main__":
+    # Example usage
+    trainer = L2RegularizedModelTrainer(weight_decay=0.01, epochs=25)
+    trainer.train()
+    print("Training complete.")
