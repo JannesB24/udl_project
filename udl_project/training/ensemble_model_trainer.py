@@ -37,7 +37,10 @@ class EnsembleModelTrainer(Trainer):
 
         device = torch.device("cpu")
 
-        model = EnsembleModel(num_classes=5, num_models=self.num_models)
+        # use standard parameters of the data loader
+        dataloader = DataLoaderFlowers.create_dataloader()
+
+        model = EnsembleModel(num_classes=dataloader.num_classes, num_models=self.num_models)
         model.to(device)
 
         criterion = nn.CrossEntropyLoss()
@@ -49,9 +52,6 @@ class EnsembleModelTrainer(Trainer):
         val_accs = np.zeros(self.epochs)
 
         print("Training Ensemble ResBlock...")
-
-        # use standard parameters of the data loader
-        dataloader = DataLoaderFlowers.create_dataloader()
 
         for epoch in range(self.epochs):
             model.train()

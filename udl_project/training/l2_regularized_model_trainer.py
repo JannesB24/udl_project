@@ -38,8 +38,11 @@ class L2RegularizedModelTrainer(Trainer):
 
         device = torch.device("cpu")
 
+        # call with standard parameters
+        data_loader = DataLoaderFlowers.create_dataloader()
+
         # Create model exactly the unregularized
-        model = ResNet(num_classes=5)
+        model = ResNet(num_classes=data_loader.num_classes)
         model.apply(weights_init)
 
         # MAIN DIFFERENCE: Adding weight_decay parameter to optimizer
@@ -56,9 +59,6 @@ class L2RegularizedModelTrainer(Trainer):
         val_accs = np.zeros(self.epochs)
 
         print("Training L2 Regularized ResNet...")
-
-        # call with standard parameters
-        data_loader = DataLoaderFlowers.create_dataloader()
 
         for epoch in range(self.epochs):
             model.train()
