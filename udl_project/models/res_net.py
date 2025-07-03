@@ -116,6 +116,7 @@ class ResNet(nn.Module):
         self.global_pool = nn.MaxPool2d(kernel_size=2, stride=2)
 
         # Fully connected layer for classification
+        # 256 * 8 * 8: 256 channels with 8x8 spatial dimensions after pooling
         self.classifier = nn.Linear(256 * 8 * 8, num_classes)
 
     def forward(self, x: torch.Tensor):

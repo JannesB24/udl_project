@@ -12,7 +12,7 @@ from udl_project.utils.weights import weights_init
 
 
 class ResNetModelTrainer(Trainer):
-    def __init__(self, *, epochs: int, learning_rate: int):
+    def __init__(self, *, epochs: int, learning_rate: float):
         super().__init__()
         self.epochs = epochs
         self.learning_rate = learning_rate
