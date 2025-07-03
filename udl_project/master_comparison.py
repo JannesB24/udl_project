@@ -17,7 +17,7 @@ def run_all_trainings():
     print("=" * 60)
 
     trainer: List[Tuple[AbstractTrainer, str]] = [
-        (ResNetModelTrainer(epochs=10), "Original ResNet"),
+        (ResNetModelTrainer(learning_rate=config.LEARNING_RATE, epochs=10), "Original ResNet"),
         (L2RegularizedModelTrainer(config.WEIGHT_DECAY, epochs=10), "L2 Regularized ResNet"),
         (EnsembleModelTrainer(config.NUMBER_OF_ENSEMBLE_MODELS, epochs=10), "Ensemble ResNet"),
     ]
