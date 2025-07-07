@@ -44,6 +44,9 @@ tree -I '.*|*data*'
 ```
 Ignoring hidden and explicitly named files.
 
+# Notebook
+The top-level notebook `master_comparison.ipynb` contains the plots from all implemented trained models with their regularization technique with ten epochs.
+
 # Code Setup
 We strongly recommend a Linux-based system. If you are using Windows, consider [installing WSL](https://learn.microsoft.com/de-de/windows/wsl/install) to use a Linux subsystem on Windows. We suggest using the latest Ubuntu.
 
