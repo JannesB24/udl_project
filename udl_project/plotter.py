@@ -303,7 +303,7 @@ def plot_summary_dashboard(results, colors):
             summary_text += f"  Validation Acc: {val_acc:.3f} ({val_improvement:+.1f}%)\n"
             summary_text += f"  Overfitting Gap: {gap:.3f} ({gap_reduction:.1f}% reduction)\n\n"
 
-    # Find best method base on the overfitting gap
+    # Find best method based on the overfitting gap
     best_method = min(results.items(), key=lambda x: x[1]["train_accs"][-1] - x[1]["val_accs"][-1])[
         0
     ]
