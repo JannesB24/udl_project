@@ -18,7 +18,7 @@ class Bottleneck(nn.Module):
 
     Args:
         in_channels (int): Number of input channels.
-        _bottleneck_channels (int): Number of channels in the bottleneck (intermediate) layers.
+        bottleneck_channels (int): Number of channels in the bottleneck (intermediate) layers.
         out_channels (int): Number of output channels.
     """
 

@@ -51,7 +51,7 @@ class EnsembleModelTrainer(Trainer):
         train_accs = np.zeros(self.epochs)
         val_accs = np.zeros(self.epochs)
 
-        print("Training Ensemble ResBlock...")
+        print("Training Ensemble ...")
 
         for epoch in range(self.epochs):
             model.train()
