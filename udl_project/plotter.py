@@ -6,6 +6,7 @@ from udl_project.utils.data_loading import load_pickled_artifacts
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+from datetime import datetime
 
 
 def load_results():
@@ -27,7 +28,8 @@ def load_results():
 
 
 def create_comprehensive_plots(results):
-    plots_path = config.ARTIFACTS_DIR / "plots"
+    date_str = datetime.now().strftime("%d_%m_%y_%H_%M_%S")
+    plots_path = config.ARTIFACTS_DIR / f"plots_{date_str}"
     plots_path.mkdir(exist_ok=True)
 
     print("\nCreating comprehensive comparison plots...")

@@ -37,7 +37,10 @@ class EnsembleModelTrainer(Trainer):
 
         device = torch.device("cpu")
 
-        model = EnsembleModel(num_classes=5, num_models=self.num_models)
+        # use standard parameters of the data loader
+        dataloader = DataLoaderFlowers.create_dataloader()
+
+        model = EnsembleModel(num_classes=dataloader.num_classes, num_models=self.num_models)
         model.to(device)
 
         criterion = nn.CrossEntropyLoss()
@@ -48,10 +51,7 @@ class EnsembleModelTrainer(Trainer):
         train_accs = np.zeros(self.epochs)
         val_accs = np.zeros(self.epochs)
 
-        print("Training Ensemble ResBlock...")
-
-        # use standard parameters of the data loader
-        dataloader = DataLoaderFlowers.create_dataloader()
+        print("Training Ensemble ...")
 
         for epoch in range(self.epochs):
             model.train()
@@ -126,3 +126,11 @@ class EnsembleModelTrainer(Trainer):
 
         with open(config.ARTIFACTS_DIR / "ensemble_results.pkl", "wb") as f:
             pickle.dump(ensemble_results, f)
+
+
+if __name__ == "__main__":
+    # Example usage
+    num_models = 5  # Example number of models in the ensemble
+    epochs = 25  # Example number of training epochs
+    trainer = EnsembleModelTrainer(num_models=num_models, epochs=epochs)
+    trainer.train()
