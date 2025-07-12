@@ -1,3 +1,4 @@
+from datetime import datetime
 import matplotlib
 
 from udl_project import config
@@ -44,7 +45,8 @@ def create_comprehensive_plots(results, show: bool = False):
     if not show:
         matplotlib.use("Agg")
 
-    plots_path = config.ARTIFACTS_DIR / "plots"
+    date_str = datetime.now().strftime("%d_%m_%y_%H_%M_%S")
+    plots_path = config.ARTIFACTS_DIR / f"plots_{date_str}"
     plots_path.mkdir(exist_ok=True)
 
     print("\nCreating comprehensive comparison plots...")

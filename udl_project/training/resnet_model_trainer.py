@@ -6,15 +6,16 @@ from datetime import datetime
 
 from udl_project import config
 from udl_project.data_loader_flowers import DataLoaderFlowers
-from udl_project.models.res_block import ResBlock
+from udl_project.models.res_net import ResNet
 from udl_project.training.abstract_trainer import Trainer
 from udl_project.utils.weights import weights_init
 
 
 class ResNetModelTrainer(Trainer):
-    def __init__(self, *, epochs: int):
+    def __init__(self, *, epochs: int, learning_rate: float):
         super().__init__()
         self.epochs = epochs
+        self.learning_rate = learning_rate
 
     def train(self):
         print("=" * 60)
@@ -30,13 +31,16 @@ class ResNetModelTrainer(Trainer):
     def _train(self) -> tuple[np.ndarray, np.ndarray]:
         device = torch.device("cpu")
 
+        # call with standard parameters
+        data_loader = DataLoaderFlowers.create_dataloader()
+
         # create model and initialize parameters
-        model = ResBlock(numClasses=5)
+        model = ResNet(num_classes=data_loader.num_classes)
         model.apply(weights_init)
 
         # choose loss function and optimizer
         criterion = nn.CrossEntropyLoss()
-        optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+        optimizer = torch.optim.Adam(model.parameters(), lr=self.learning_rate)
 
         # initial tracking variables
         train_losses = np.zeros(self.epochs)
@@ -45,9 +49,6 @@ class ResNetModelTrainer(Trainer):
         val_accs = np.zeros(self.epochs)
 
         print("Training Unregularized ResNet...")
-
-        # call with standard parameters
-        data_loader = DataLoaderFlowers.create_dataloader()
 
         for epoch in range(self.epochs):
             model.train()
@@ -131,3 +132,9 @@ class ResNetModelTrainer(Trainer):
             pickle.dump(original_results, f)
 
         return train_accs, val_accs
+
+
+if __name__ == "__main__":
+    # example usage
+    trainer = ResNetModelTrainer(learning_rate=0.001, epochs=25)
+    trainer.train()
