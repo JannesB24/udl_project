@@ -20,8 +20,8 @@ This project demonstrates a small residual network (ResNet) that initially strug
 - 👷 **...**
 
 # Prerequisites
-Download [this dataset from Kaggle](https://www.kaggle.com/datasets/lara311/flowers-five-classes).
-Each user must download the dataset themselves, as it is not included in this repository for licensing reasons. The dataset must be present next to the project folder (`udl_project`) in the root directory of the project (`data/train/[label]`, e.g., daisy or rose).
+[This dataset](https://www.kaggle.com/datasets/lara311/flowers-five-classes) will be downloaded from kaggle via the `kagglehub` python package.
+
 
 ## Project Setup
 <pre>
