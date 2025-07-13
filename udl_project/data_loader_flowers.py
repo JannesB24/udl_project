@@ -81,7 +81,7 @@ class DataLoaderFlowers:
                 transforms.ToTensor(),
             ]
         )
-        dataset = datasets.ImageFolder(data_directory, transform=simple_transform)
+        dataset = datasets.ImageFolder(f"{data_directory}/train", transform=simple_transform)
         train_size = int(0.8 * len(dataset))
         test_size = len(dataset) - train_size
 
