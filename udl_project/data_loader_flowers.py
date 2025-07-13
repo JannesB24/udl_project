@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import kagglehub
 from torch.utils.data import random_split
 from torch.utils.data import DataLoader
@@ -72,7 +73,7 @@ class DataLoaderFlowers:
             DataLoaderFlowers: DataLoaderFlowers instance
         """
         # Download latest version
-        data_directory = kagglehub.dataset_download("lara311/flowers-five-classes")
+        data_directory = Path(kagglehub.dataset_download("lara311/flowers-five-classes"))
         print(f"Data directory: {data_directory}")
 
         simple_transform = transforms.Compose(
@@ -81,7 +82,7 @@ class DataLoaderFlowers:
                 transforms.ToTensor(),
             ]
         )
-        dataset = datasets.ImageFolder(data_directory, transform=simple_transform)
+        dataset = datasets.ImageFolder(data_directory / "train", transform=simple_transform)
         train_size = int(0.8 * len(dataset))
         test_size = len(dataset) - train_size
 
