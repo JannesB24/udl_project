@@ -23,7 +23,12 @@ class Bottleneck(nn.Module):
     """
 
     def __init__(
-        self, in_channels: int, bottleneck_channels: int, out_channels: int, stride: int = 1
+        self,
+        in_channels: int,
+        bottleneck_channels: int,
+        out_channels: int,
+        stride: int = 1,
+        dropout: float = 0.0,
     ):
         super(Bottleneck, self).__init__()
 
@@ -58,6 +63,7 @@ class Bottleneck(nn.Module):
         )
 
         self.relu = nn.ReLU()
+        self.dropout = nn.Dropout2d(p=dropout) if dropout > 0 else nn.Identity()
 
         self.shortcut = nn.Sequential()
         if in_channels != out_channels:
@@ -67,15 +73,15 @@ class Bottleneck(nn.Module):
             )
 
     def forward(self, x: torch.Tensor):
-        out = self.conv1(self.relu(self.bn1(x)))
-        out = self.conv2(self.relu(self.bn2(out)))
-        out = self.conv3(self.relu(self.bn3(out)))
+        out = self.conv1(self.dropout(self.relu(self.bn1(x))))
+        out = self.conv2(self.dropout(self.relu(self.bn2(out))))
+        out = self.conv3(self.dropout(self.relu(self.bn3(out))))
         out += self.shortcut(x)
         return out
 
 
 class ResNet(nn.Module):
-    def __init__(self, num_classes: int):
+    def __init__(self, num_classes: int, dropout: float = 0.0):
         super(ResNet, self).__init__()
 
         in_channels = 3
@@ -96,20 +102,18 @@ class ResNet(nn.Module):
         )
 
         # First bottleneck block: input 64 channels, bottleneck 16, output 64
-        self.bottleneck_one = Bottleneck(in_channels=64, bottleneck_channels=16, out_channels=64)
+        self.bottleneck_one = Bottleneck(
+            in_channels=64, bottleneck_channels=16, out_channels=64, dropout=dropout
+        )
 
         # Second bottleneck block: input 64 channels, bottleneck 32, output 128
         self.bottleneck_two = Bottleneck(
-            in_channels=64,
-            bottleneck_channels=32,
-            out_channels=128,
+            in_channels=64, bottleneck_channels=32, out_channels=128, dropout=dropout
         )
 
         # Third bottleneck block: input 128 channels, bottleneck 64, output 256
         self.bottleneck_three = Bottleneck(
-            in_channels=128,
-            bottleneck_channels=64,
-            out_channels=256,
+            in_channels=128, bottleneck_channels=64, out_channels=256, dropout=dropout
         )
 
         # Global pooling to reduce spatial dimensions
@@ -117,6 +121,7 @@ class ResNet(nn.Module):
 
         # Fully connected layer for classification
         # 256 * 8 * 8: 256 channels with 8x8 spatial dimensions after pooling
+        self.dropout = nn.Dropout(p=dropout) if dropout > 0 else nn.Identity()
         self.classifier = nn.Linear(256 * 8 * 8, num_classes)
 
     def forward(self, x: torch.Tensor):
@@ -131,5 +136,6 @@ class ResNet(nn.Module):
 
         out = self.global_pool(out)
         out = torch.flatten(out, start_dim=1)
+        out = self.dropout(out)
 
         return self.classifier(out)

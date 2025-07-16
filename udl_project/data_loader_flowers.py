@@ -1,6 +1,6 @@
 import os
+from pathlib import Path
 import kagglehub
-from torch.utils.data import random_split
 from torch.utils.data import DataLoader
 
 from torchvision import datasets, transforms
@@ -15,16 +15,17 @@ NUM_WORKERS = os.cpu_count()
 class DataLoaderFlowers:
     def __init__(
         self,
-        dataset: datasets.ImageFolder,
-        train_size: int,
-        test_size: int,
+        train_dataset: datasets.ImageFolder,
+        test_dataset: datasets.ImageFolder,
         batch_size: int,
         num_workers: int,
     ) -> None:
-        self.train_data, self.test_data = random_split(dataset, [train_size, test_size])
+        self.train_dataset = train_dataset
+        self.test_dataset = test_dataset
+
         self.batch_size = batch_size
         self.num_workers = num_workers
-        self.num_classes = len(dataset.classes)
+        self.num_classes = len(train_dataset.classes)
 
     def get_test_dataloader(self) -> DataLoader:
         """Creates a DataLoader for the test dataset.
@@ -36,7 +37,10 @@ class DataLoaderFlowers:
         )
 
         test_dataloader = DataLoader(
-            self.test_data, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers
+            self.test_dataset,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=self.num_workers,
         )
         return test_dataloader
 
@@ -50,7 +54,10 @@ class DataLoaderFlowers:
         )
 
         train_dataloader = DataLoader(
-            self.train_data, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers
+            self.train_dataset,
+            batch_size=self.batch_size,
+            shuffle=True,
+            num_workers=self.num_workers,
         )
         return train_dataloader
 
@@ -72,7 +79,8 @@ class DataLoaderFlowers:
             DataLoaderFlowers: DataLoaderFlowers instance
         """
         # Download latest version
-        data_directory = kagglehub.dataset_download("lara311/flowers-five-classes")
+        # data_directory = Path(kagglehub.dataset_download("lara311/flowers-five-classes"))
+        data_directory = Path(kagglehub.dataset_download("msarmi9/food101tiny"))
         print(f"Data directory: {data_directory}")
 
         simple_transform = transforms.Compose(
@@ -81,14 +89,15 @@ class DataLoaderFlowers:
                 transforms.ToTensor(),
             ]
         )
-        dataset = datasets.ImageFolder(data_directory, transform=simple_transform)
-        train_size = int(0.8 * len(dataset))
-        test_size = len(dataset) - train_size
-
+        train_dataset = datasets.ImageFolder(
+            data_directory / "data" / "food-101-tiny" / "train", transform=simple_transform
+        )
+        test_dataset = datasets.ImageFolder(
+            data_directory / "data" / "food-101-tiny" / "valid", transform=simple_transform
+        )
         return DataLoaderFlowers(
-            dataset=dataset,
-            train_size=train_size,
-            test_size=test_size,
+            train_dataset=train_dataset,
+            test_dataset=test_dataset,
             batch_size=batch_size,
             num_workers=num_workers,
         )

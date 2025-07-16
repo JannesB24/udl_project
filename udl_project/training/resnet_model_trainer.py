@@ -35,7 +35,7 @@ class ResNetModelTrainer(Trainer):
         data_loader = DataLoaderFlowers.create_dataloader()
 
         # create model and initialize parameters
-        model = ResNet(num_classes=data_loader.num_classes)
+        model = ResNet(num_classes=data_loader.num_classes, dropout=0.5)
         model.apply(weights_init)
 
         # choose loss function and optimizer
