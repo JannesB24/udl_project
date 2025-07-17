@@ -1,15 +1,22 @@
+from datetime import datetime
 import matplotlib
 
 from udl_project import config
 from udl_project.utils.data_loading import load_pickled_artifacts
 
-matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
-from datetime import datetime
+
+COLORS = {"Original ResNet": "red", "L2 Regularized ResNet": "blue", "Ensemble ResNet": "green"}
+LINESTYLES = {"Original ResNet": "-", "L2 Regularized ResNet": "--", "Ensemble ResNet": "-."}
 
 
 def load_results():
+    """
+    Load all required results from pickled files, that were produced by running each trainer.
+
+    A trainer implements the abstract class `Trainer`.
+    """
     results = {}
 
     # Load original results
@@ -27,88 +34,114 @@ def load_results():
     return results
 
 
-def create_comprehensive_plots(results):
+def create_comprehensive_plots(results, show: bool = False):
+    """
+    Create comprehensive comparison plots to compare the regularization techniques.
+
+    Args:
+        results (dict): Dictionary containing the results from different trainers.
+        show (bool): If True, display the plots interactively. If False, save them to the artifacts directory.
+    """
+    if not show:
+        matplotlib.use("Agg")
+
     date_str = datetime.now().strftime("%d_%m_%y_%H_%M_%S")
     plots_path = config.ARTIFACTS_DIR / f"plots_{date_str}"
     plots_path.mkdir(exist_ok=True)
 
     print("\nCreating comprehensive comparison plots...")
 
-    # Set up colors and styles for each method
-    colors = {"Original ResNet": "red", "L2 Regularized ResNet": "blue", "Ensemble ResNet": "green"}
-    linestyles = {"Original ResNet": "-", "L2 Regularized ResNet": "--", "Ensemble ResNet": "-."}
+    fig1 = plot_comparison(results, COLORS, LINESTYLES)
+    if not show:
+        fig1.savefig(plots_path / "udl_comprehensive_comparison.png", dpi=300, bbox_inches="tight")
+    plt.close(fig1)
 
-    # Main comparison plot - 2x2 subplots
+    fig2 = plot_overfitting_analysis(results, COLORS, LINESTYLES)
+    if not show:
+        fig2.savefig(plots_path / "udl_overfitting_analysis.png", dpi=300, bbox_inches="tight")
+    plt.close(fig2)
+
+    fig3 = plot_summary_dashboard(results, COLORS)
+    if not show:
+        fig3.savefig(plots_path / "udl_summary_dashboard.png", dpi=300, bbox_inches="tight")
+    plt.close(fig3)
+
+
+def plot_comparison(results, colors, linestyles):
     fig, axes = plt.subplots(2, 2, figsize=(16, 12))
     fig.suptitle(
         "UDL Project - Comprehensive Regularization Comparison", fontsize=16, fontweight="bold"
     )
 
     # Plot 1: Training Loss
-    axes[0, 0].set_title("Training Loss Comparison", fontweight="bold", fontsize=14)
+    ax_train_loss = axes[0, 0]
+    ax_train_loss.set_title("Training Loss Comparison", fontweight="bold", fontsize=14)
     for name, data in results.items():
-        axes[0, 0].plot(
+        ax_train_loss.plot(
             data["train_losses"],
             label=name,
             linewidth=2.5,
             color=colors[name],
             linestyle=linestyles[name],
         )
-    axes[0, 0].set_xlabel("Epoch")
-    axes[0, 0].set_ylabel("Loss")
-    axes[0, 0].legend()
-    axes[0, 0].grid(True, alpha=0.3)
+    ax_train_loss.set_xlabel("Epoch")
+    ax_train_loss.set_ylabel("Loss")
+    ax_train_loss.legend()
+    ax_train_loss.grid(True, alpha=0.3)
 
     # Plot 2: Validation Loss
-    axes[0, 1].set_title("Validation Loss Comparison", fontweight="bold", fontsize=14)
+    ax_val_loss = axes[0, 1]
+    ax_val_loss.set_title("Validation Loss Comparison", fontweight="bold", fontsize=14)
     for name, data in results.items():
-        axes[0, 1].plot(
+        ax_val_loss.plot(
             data["val_losses"],
             label=name,
             linewidth=2.5,
             color=colors[name],
             linestyle=linestyles[name],
         )
-    axes[0, 1].set_xlabel("Epoch")
-    axes[0, 1].set_ylabel("Loss")
-    axes[0, 1].legend()
-    axes[0, 1].grid(True, alpha=0.3)
+    ax_val_loss.set_xlabel("Epoch")
+    ax_val_loss.set_ylabel("Loss")
+    ax_val_loss.legend()
+    ax_val_loss.grid(True, alpha=0.3)
 
     # Plot 3: Training Accuracy
-    axes[1, 0].set_title("Training Accuracy Comparison", fontweight="bold", fontsize=14)
+    ax_train_acc = axes[1, 0]
+    ax_train_acc.set_title("Training Accuracy Comparison", fontweight="bold", fontsize=14)
     for name, data in results.items():
-        axes[1, 0].plot(
+        ax_train_acc.plot(
             data["train_accs"],
             label=name,
             linewidth=2.5,
             color=colors[name],
             linestyle=linestyles[name],
         )
-    axes[1, 0].set_xlabel("Epoch")
-    axes[1, 0].set_ylabel("Accuracy")
-    axes[1, 0].legend()
-    axes[1, 0].grid(True, alpha=0.3)
+    ax_train_acc.set_xlabel("Epoch")
+    ax_train_acc.set_ylabel("Accuracy")
+    ax_train_acc.legend()
+    ax_train_acc.grid(True, alpha=0.3)
 
     # Plot 4: Validation Accuracy
-    axes[1, 1].set_title("Validation Accuracy Comparison", fontweight="bold", fontsize=14)
+    ax_val_acc = axes[1, 1]
+    ax_val_acc.set_title("Validation Accuracy Comparison", fontweight="bold", fontsize=14)
     for name, data in results.items():
-        axes[1, 1].plot(
+        ax_val_acc.plot(
             data["val_accs"],
             label=name,
             linewidth=2.5,
             color=colors[name],
             linestyle=linestyles[name],
         )
-    axes[1, 1].set_xlabel("Epoch")
-    axes[1, 1].set_ylabel("Accuracy")
-    axes[1, 1].legend()
-    axes[1, 1].grid(True, alpha=0.3)
+    ax_val_acc.set_xlabel("Epoch")
+    ax_val_acc.set_ylabel("Accuracy")
+    ax_val_acc.legend()
+    ax_val_acc.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig(plots_path / "udl_comprehensive_comparison.png", dpi=300, bbox_inches="tight")
-    plt.close()
+    return fig
 
-    # Overfitting Analysis - 1x3 subplots
+
+def plot_overfitting_analysis(results, colors, linestyles):
     fig, axes = plt.subplots(1, 3, figsize=(18, 6))
     fig.suptitle("UDL Project - Overfitting Analysis", fontsize=16, fontweight="bold")
 
@@ -181,11 +214,11 @@ def create_comprehensive_plots(results):
         )
 
     plt.tight_layout()
-    plt.savefig(plots_path / "udl_overfitting_analysis.png", dpi=300, bbox_inches="tight")
-    plt.close()
+    return fig
 
-    # Combined metrics plot
-    plt.figure(figsize=(12, 8))
+
+def plot_summary_dashboard(results, colors):
+    fig = plt.figure(figsize=(12, 8))
 
     # Create a combined plot showing both training and validation curves
     plt.subplot(2, 2, 1)
@@ -272,7 +305,7 @@ def create_comprehensive_plots(results):
             summary_text += f"  Validation Acc: {val_acc:.3f} ({val_improvement:+.1f}%)\n"
             summary_text += f"  Overfitting Gap: {gap:.3f} ({gap_reduction:.1f}% reduction)\n\n"
 
-    # Find best method
+    # Find best method based on the overfitting gap
     best_method = min(results.items(), key=lambda x: x[1]["train_accs"][-1] - x[1]["val_accs"][-1])[
         0
     ]
@@ -290,8 +323,7 @@ def create_comprehensive_plots(results):
     )
 
     plt.tight_layout()
-    plt.savefig(plots_path / "udl_summary_dashboard.png", dpi=300, bbox_inches="tight")
-    plt.close()
+    return fig
 
 
 def print_summary(results):
