@@ -5,7 +5,7 @@ import torch.nn as nn
 from datetime import datetime
 
 from udl_project import config
-from udl_project.data_loader_flowers import DataLoaderFlowers
+from udl_project.data_loader import CustomDataLoader
 from udl_project.models.res_net import ResNet
 from udl_project.training.abstract_trainer import Trainer
 from udl_project.utils.weights import weights_init
@@ -32,7 +32,7 @@ class ResNetModelTrainer(Trainer):
         device = torch.device("cpu")
 
         # call with standard parameters
-        data_loader = DataLoaderFlowers.create_dataloader()
+        data_loader = CustomDataLoader.create_dataloader()
 
         # create model and initialize parameters
         model = ResNet(num_classes=data_loader.num_classes)

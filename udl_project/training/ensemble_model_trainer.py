@@ -5,7 +5,7 @@ from datetime import datetime
 import pickle
 
 from udl_project import config
-from udl_project.data_loader_flowers import DataLoaderFlowers
+from udl_project.data_loader import CustomDataLoader
 from udl_project.models.ensemble_model import EnsembleModel
 
 from udl_project.training.abstract_trainer import Trainer
@@ -38,7 +38,7 @@ class EnsembleModelTrainer(Trainer):
         device = torch.device("cpu")
 
         # use standard parameters of the data loader
-        dataloader = DataLoaderFlowers.create_dataloader()
+        dataloader = CustomDataLoader.create_dataloader()
 
         model = EnsembleModel(num_classes=dataloader.num_classes, num_models=self.num_models)
         model.to(device)
