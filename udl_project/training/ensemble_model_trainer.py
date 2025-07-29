@@ -1,13 +1,13 @@
+import pickle
+from datetime import datetime
+
 import numpy as np
 import torch
-import torch.nn as nn
-from datetime import datetime
-import pickle
+from torch import nn
 
 from udl_project import config
 from udl_project.data_loader_flowers import DataLoaderFlowers
 from udl_project.models.ensemble_model import EnsembleModel
-
 from udl_project.training.abstract_trainer import Trainer
 
 
@@ -64,12 +64,12 @@ class EnsembleModelTrainer(Trainer):
 
             # Training phase
             for images, labels in dataloader.get_train_dataloader():
-                images = images.to(device)
-                labels = labels.to(device)
+                images_device = images.to(device)
+                labels_device = labels.to(device)
 
                 optimizer.zero_grad()
-                y_pred = model(images)
-                loss = criterion(y_pred, labels)
+                y_pred = model(images_device)
+                loss = criterion(y_pred, labels_device)
                 loss.backward()
                 optimizer.step()
 
@@ -89,11 +89,11 @@ class EnsembleModelTrainer(Trainer):
             n_total_val = 0
             with torch.no_grad():
                 for images, labels in dataloader.get_test_dataloader():
-                    images = images.to(device)
-                    labels = labels.to(device)
+                    images_device = images.to(device)
+                    labels_device = labels.to(device)
 
-                    y_pred = model(images)
-                    loss = criterion(y_pred, labels)
+                    y_pred = model(images_device)
+                    loss = criterion(y_pred, labels_device)
                     val_loss.append(loss.item())
 
                     _, predicted_labels = torch.max(y_pred, 1)
@@ -124,7 +124,7 @@ class EnsembleModelTrainer(Trainer):
             "model_name": "Ensemble ResNet",
         }
 
-        with open(config.ARTIFACTS_DIR / "ensemble_results.pkl", "wb") as f:
+        with (config.ARTIFACTS_DIR / "ensemble_results.pkl").open("wb") as f:
             pickle.dump(ensemble_results, f)
 
 
