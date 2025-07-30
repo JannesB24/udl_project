@@ -1,11 +1,10 @@
+import logging
 import os
 from pathlib import Path
-import kagglehub
-from torch.utils.data import random_split
-from torch.utils.data import DataLoader
 
+import kagglehub
+from torch.utils.data import DataLoader, random_split
 from torchvision import datasets, transforms
-import logging
 
 # TODO: possibly relocate to config file or make them accessible for other modules!?
 BATCH_SIZE = 32
@@ -29,6 +28,7 @@ class DataLoaderFlowers:
 
     def get_test_dataloader(self) -> DataLoader:
         """Creates a DataLoader for the test dataset.
+
         Returns:
             DataLoader: DataLoader for the test dataset.
         """
@@ -36,13 +36,13 @@ class DataLoaderFlowers:
             f"Creating test data loader with batch size {self.batch_size} and {self.num_workers} workers."
         )
 
-        test_dataloader = DataLoader(
+        return DataLoader(
             self.test_data, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers
         )
-        return test_dataloader
 
     def get_train_dataloader(self) -> DataLoader:
         """Creates a DataLoader for the training dataset.
+
         Returns:
             DataLoader: DataLoader for the training dataset.
         """
@@ -50,10 +50,9 @@ class DataLoaderFlowers:
             f"Creating train data loader with batch size {self.batch_size} and {self.num_workers} workers."
         )
 
-        train_dataloader = DataLoader(
+        return DataLoader(
             self.train_data, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers
         )
-        return train_dataloader
 
     @staticmethod
     def create_dataloader(

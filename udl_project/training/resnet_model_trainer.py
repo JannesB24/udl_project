@@ -1,8 +1,9 @@
 import pickle
+from datetime import datetime
+
 import numpy as np
 import torch
-import torch.nn as nn
-from datetime import datetime
+from torch import nn
 
 from udl_project import config
 from udl_project.data_loader_flowers import DataLoaderFlowers
@@ -60,13 +61,13 @@ class ResNetModelTrainer(Trainer):
             n_total_train = 0
 
             for images, labels in data_loader.get_train_dataloader():
-                images = images.to(device)
-                labels = labels.to(device)
+                images_device = images.to(device)
+                labels_device = labels.to(device)
 
                 optimizer.zero_grad()
 
-                y_pred = model(images)
-                loss = criterion(y_pred, labels)
+                y_pred = model(images_device)
+                loss = criterion(y_pred, labels_device)
 
                 loss.backward()
                 optimizer.step()
@@ -89,19 +90,19 @@ class ResNetModelTrainer(Trainer):
             n_total_val = 0
             with torch.no_grad():
                 for images, labels in data_loader.get_test_dataloader():
-                    images = images.to(device)
-                    labels = labels.to(device)
+                    images_device = images.to(device)
+                    labels_device = labels.to(device)
 
-                    y_pred = model(images)
-                    loss = criterion(y_pred, labels)
+                    y_pred = model(images_device)
+                    loss = criterion(y_pred, labels_device)
 
                     # Store the validation loss
                     val_loss.append(loss.item())
 
                     # Compute validation accuracy
                     _, predicted_labels = torch.max(y_pred, 1)
-                    n_correct_val += (predicted_labels == labels).sum().item()
-                    n_total_val += labels.shape[0]
+                    n_correct_val += (predicted_labels == labels_device).sum().item()
+                    n_total_val += labels_device.shape[0]
 
             val_loss = np.mean(val_loss)
             val_losses[epoch] = val_loss
@@ -128,7 +129,8 @@ class ResNetModelTrainer(Trainer):
             "model_name": "Original ResNet",
         }
 
-        with open(config.ARTIFACTS_DIR / "original_results.pkl", "wb") as f:
+        results_path = config.ARTIFACTS_DIR / "original_results.pkl"
+        with results_path.open("wb") as f:
             pickle.dump(original_results, f)
 
         return train_accs, val_accs

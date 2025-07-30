@@ -1,10 +1,10 @@
 import torch
-import torch.nn as nn
+from torch import nn
 
 
 class CNN(torch.nn.Module):
-    def __init__(self, numClasses):
-        super(CNN, self).__init__()
+    def __init__(self, num_classes):
+        super().__init__()
         self.features = nn.Sequential(
             nn.Conv2d(3, 16, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
@@ -14,7 +14,7 @@ class CNN(torch.nn.Module):
             nn.MaxPool2d(kernel_size=2, stride=2),
         )
         self.classifier = nn.Sequential(
-            nn.Linear(32 * 56 * 56, 128), nn.ReLU(inplace=True), nn.Linear(128, numClasses)
+            nn.Linear(32 * 56 * 56, 128), nn.ReLU(inplace=True), nn.Linear(128, num_classes)
         )
 
     def count_params(self):
@@ -23,5 +23,4 @@ class CNN(torch.nn.Module):
     def forward(self, x):
         x = self.features(x)
         x = x.view(x.size(0), -1)
-        x = self.classifier(x)
-        return x
+        return self.classifier(x)
