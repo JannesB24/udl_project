@@ -3,7 +3,7 @@ from datetime import datetime
 
 import numpy as np
 import torch
-import torch.nn as nn
+from torch import nn
 
 from udl_project import config
 from udl_project.data_handling.data_loader_flowers import DataLoaderFlowers
@@ -26,7 +26,7 @@ class DataAugmentation(Trainer):
 
         train_accs, val_accs = self._train()
 
-        print("\Data augmented model training completed!")
+        print(r"\Data augmented model training completed!")
         print(f"Final overfitting gap: {train_accs[-1] - val_accs[-1]:.4f}")
         print(f"Results saved to {config.ARTIFACTS_DIR / 'augmented_results.pkl'}")
 
@@ -62,13 +62,13 @@ class DataAugmentation(Trainer):
             n_total_train = 0
 
             for images, labels in data_loader.get_train_dataloader():
-                images = images.to(device)
-                labels = labels.to(device)
+                images_device = images.to(device)
+                labels_device = labels.to(device)
 
                 optimizer.zero_grad()
 
-                y_pred = model(images)
-                loss = criterion(y_pred, labels)
+                y_pred = model(images_device)
+                loss = criterion(y_pred, labels_device)
 
                 loss.backward()
                 optimizer.step()
@@ -91,11 +91,11 @@ class DataAugmentation(Trainer):
             n_total_val = 0
             with torch.no_grad():
                 for images, labels in data_loader.get_test_dataloader():
-                    images = images.to(device)
-                    labels = labels.to(device)
+                    images_device = images.to(device)
+                    labels_device = labels.to(device)
 
-                    y_pred = model(images)
-                    loss = criterion(y_pred, labels)
+                    y_pred = model(images_device)
+                    loss = criterion(y_pred, labels_device)
 
                     # Store the validation loss
                     val_loss.append(loss.item())

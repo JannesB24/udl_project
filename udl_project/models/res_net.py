@@ -1,10 +1,9 @@
 import torch
-import torch.nn as nn
+from torch import nn
 
 
 class Bottleneck(nn.Module):
-    """
-    A Bottleneck block as used in ResNet architectures.
+    """A Bottleneck block as used in ResNet architectures.
 
     Bottleneck blocks are designed to make very deep neural networks more efficient and easier to train by reducing the number of parameters (in channels > bottleneck_channels) and computational cost. They achieve this by using a three-layer structure:
         1. A 1x1 convolution reduces the number of channels (dimensionality reduction).
@@ -25,7 +24,7 @@ class Bottleneck(nn.Module):
     def __init__(
         self, in_channels: int, bottleneck_channels: int, out_channels: int, stride: int = 1
     ):
-        super(Bottleneck, self).__init__()
+        super().__init__()
 
         self.bn1 = nn.BatchNorm2d(in_channels)
         self.conv1 = nn.Conv2d(
@@ -76,7 +75,7 @@ class Bottleneck(nn.Module):
 
 class ResNet(nn.Module):
     def __init__(self, num_classes: int):
-        super(ResNet, self).__init__()
+        super().__init__()
 
         in_channels = 3
 
@@ -120,7 +119,7 @@ class ResNet(nn.Module):
         self.classifier = nn.Linear(256 * 28 * 28, num_classes)
 
     def forward(self, x: torch.Tensor):
-        # torch.Size([32, 3, 64, 64])
+        # Tensort -> torch.Size([32, 3, 64, 64])
         # x: [batch_size, channels (RGB=3), height=64, width=64]
 
         out = self.pre(x)

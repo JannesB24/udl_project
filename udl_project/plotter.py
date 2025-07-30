@@ -1,19 +1,18 @@
 from datetime import datetime
-import matplotlib
+
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import numpy as np
 
 from udl_project import config
 from udl_project.utils.data_loading import load_pickled_artifacts
-
-import matplotlib.pyplot as plt
-import numpy as np
 
 COLORS = {"Original ResNet": "red", "L2 Regularized ResNet": "blue", "Ensemble ResNet": "green"}
 LINESTYLES = {"Original ResNet": "-", "L2 Regularized ResNet": "--", "Ensemble ResNet": "-."}
 
 
 def load_results():
-    """
-    Load all required results from pickled files, that were produced by running each trainer.
+    """Load all required results from pickled files, that were produced by running each trainer.
 
     A trainer implements the abstract class `Trainer`.
     """
@@ -35,15 +34,14 @@ def load_results():
 
 
 def create_comprehensive_plots(results, show: bool = False):
-    """
-    Create comprehensive comparison plots to compare the regularization techniques.
+    """Create comprehensive comparison plots to compare the regularization techniques.
 
     Args:
         results (dict): Dictionary containing the results from different trainers.
         show (bool): If True, display the plots interactively. If False, save them to the artifacts directory.
     """
     if not show:
-        matplotlib.use("Agg")
+        mpl.use("Agg")
 
     date_str = datetime.now().strftime("%d_%m_%y_%H_%M_%S")
     plots_path = config.ARTIFACTS_DIR / f"plots_{date_str}"
@@ -176,7 +174,7 @@ def plot_overfitting_analysis(results, colors, linestyles):
     axes[1].grid(True, alpha=0.3, axis="y")
 
     # Add value labels on bars
-    for bar, gap in zip(bars, gaps):
+    for bar, gap in zip(bars, gaps, strict=False):
         axes[1].text(
             bar.get_x() + bar.get_width() / 2,
             bar.get_height() + 0.005,
@@ -203,7 +201,7 @@ def plot_overfitting_analysis(results, colors, linestyles):
     axes[2].grid(True, alpha=0.3, axis="y")
 
     # Add value labels on bars
-    for bar, acc in zip(bars, val_accs):
+    for bar, acc in zip(bars, val_accs, strict=False):
         axes[2].text(
             bar.get_x() + bar.get_width() / 2,
             bar.get_height() + 0.005,
@@ -267,7 +265,7 @@ def plot_summary_dashboard(results, colors):
     plt.xticks(rotation=45, ha="right")
 
     # Add value labels
-    for bar, reduction in zip(bars, gap_reductions):
+    for bar, reduction in zip(bars, gap_reductions, strict=False):
         plt.text(
             bar.get_x() + bar.get_width() / 2,
             bar.get_height() + 1,
@@ -327,7 +325,7 @@ def plot_summary_dashboard(results, colors):
 
 
 def print_summary(results):
-    """Print final results summary"""
+    """Print final results summary."""
     print("\n" + "=" * 60)
     print("FINAL RESULTS SUMMARY")
     print("=" * 60)

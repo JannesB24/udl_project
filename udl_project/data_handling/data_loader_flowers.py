@@ -36,10 +36,9 @@ class DataLoaderFlowers:
             f"Creating test data loader with batch size {self.batch_size} and {self.num_workers} workers."
         )
 
-        test_dataloader = DataLoader(
+        return DataLoader(
             self.test_data, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers
         )
-        return test_dataloader
 
     def get_train_dataloader(self) -> DataLoader:
         """Creates a DataLoader for the training dataset.
@@ -51,10 +50,9 @@ class DataLoaderFlowers:
             f"Creating train data loader with batch size {self.batch_size} and {self.num_workers} workers."
         )
 
-        train_dataloader = DataLoader(
+        return DataLoader(
             self.train_data, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers
         )
-        return train_dataloader
 
     @staticmethod
     def create_dataloader(
