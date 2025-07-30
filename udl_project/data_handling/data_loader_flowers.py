@@ -1,34 +1,34 @@
-import os
-from pathlib import Path
-import kagglehub
-from torch.utils.data import random_split
-from torch.utils.data import DataLoader
-
-from torchvision import datasets, transforms
 import logging
+import os
+
+from torch.utils.data import DataLoader, Dataset
+from torchvision.transforms import v2
+
+from udl_project.data_handling.flower_dataset import FlowerDataset
 
 # TODO: possibly relocate to config file or make them accessible for other modules!?
 BATCH_SIZE = 32
-IMAGE_DIM = (64, 64)
+IMAGE_DIM = (224, 224)
 NUM_WORKERS = os.cpu_count()
 
 
 class DataLoaderFlowers:
     def __init__(
         self,
-        dataset: datasets.ImageFolder,
-        train_size: int,
-        test_size: int,
+        train_data: Dataset,
+        test_data: Dataset,
         batch_size: int,
         num_workers: int,
     ) -> None:
-        self.train_data, self.test_data = random_split(dataset, [train_size, test_size])
+        self.train_data = train_data
+        self.test_data = test_data
         self.batch_size = batch_size
         self.num_workers = num_workers
-        self.num_classes = len(dataset.classes)
+        self.num_classes = len(train_data.classes)
 
     def get_test_dataloader(self) -> DataLoader:
         """Creates a DataLoader for the test dataset.
+
         Returns:
             DataLoader: DataLoader for the test dataset.
         """
@@ -43,6 +43,7 @@ class DataLoaderFlowers:
 
     def get_train_dataloader(self) -> DataLoader:
         """Creates a DataLoader for the training dataset.
+
         Returns:
             DataLoader: DataLoader for the training dataset.
         """
@@ -57,6 +58,7 @@ class DataLoaderFlowers:
 
     @staticmethod
     def create_dataloader(
+        flower_data_source: FlowerDataset,
         batch_size: int = BATCH_SIZE,
         num_workers: int = NUM_WORKERS,
         image_dim: tuple = IMAGE_DIM,
@@ -64,7 +66,7 @@ class DataLoaderFlowers:
         """Creates an instance of the DataLoaderFlowers class.
 
         Args:
-            data_directory (Path): Path to the directory containing the image dataset.
+            flower_data_source (FlowerDataset): Source dataset containing flower images and labels.
             batch_size (int): Number of samples per batch.
             num_workers (int): Number of subprocesses to use for data loading.
             image_dim (tuple): Dimensions to which images will be resized (square).
@@ -72,24 +74,32 @@ class DataLoaderFlowers:
         Returns:
             DataLoaderFlowers: DataLoaderFlowers instance
         """
-        # Download latest version
-        data_directory = Path(kagglehub.dataset_download("lara311/flowers-five-classes"))
-        print(f"Data directory: {data_directory}")
-
-        simple_transform = transforms.Compose(
+        train_transform = v2.Compose(
             [
-                transforms.Resize(image_dim),
-                transforms.ToTensor(),
+                v2.RandomResizedCrop(image_dim, scale=(0.8, 1.0), antialias=True),
+                v2.RandomHorizontalFlip(),
+                v2.RandomRotation(degrees=90),
+                v2.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.3, hue=0.1),
+                v2.ToTensor(),
             ]
         )
-        dataset = datasets.ImageFolder(data_directory / "train", transform=simple_transform)
-        train_size = int(0.8 * len(dataset))
-        test_size = len(dataset) - train_size
 
-        return DataLoaderFlowers(
-            dataset=dataset,
-            train_size=train_size,
-            test_size=test_size,
+        non_train_transform = v2.Compose(
+            [
+                v2.Resize(image_dim),
+                v2.ToTensor(),
+            ]
+        )
+
+        train_data = flower_data_source.get_train_subset(train_transform)
+        test_data = flower_data_source.get_test_subset(non_train_transform)
+
+        # Create a DataLoaderFlowers instance using the split datasets
+        loader = DataLoaderFlowers(
+            train_data=train_data,
+            test_data=test_data,
             batch_size=batch_size,
             num_workers=num_workers,
         )
+
+        return loader
