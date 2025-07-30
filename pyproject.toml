@@ -58,8 +58,8 @@ ignore = [
     "PLR0913", # Too many arguments to function call
     "PLR0912", # Too many branches
     "PLR0915", # Too many statements
-    "TC001",
-    "RET504",
+    "TC001",   # Missing type-checking block (e.g., 'if TYPE_CHECKING:')
+    "RET504",  # Unnecessary variable assignment before return
 ]
 
 [tool.ruff.lint.pydocstyle]
