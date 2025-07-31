@@ -7,8 +7,18 @@ from udl_project.utils.data_loading import load_pickled_artifacts
 import matplotlib.pyplot as plt
 import numpy as np
 
-COLORS = {"Original ResNet": "red", "L2 Regularized ResNet": "blue", "Ensemble ResNet": "green", "Transfer ResNet Frozen":"yellow"}
-LINESTYLES = {"Original ResNet": "-", "L2 Regularized ResNet": "--", "Ensemble ResNet": "-.", "Transfer ResNet Frozen": ":" }
+COLORS = {
+    "Original ResNet": "red",
+    "L2 Regularized ResNet": "blue",
+    "Ensemble ResNet": "green",
+    "Transfer ResNet Frozen": "yellow",
+}
+LINESTYLES = {
+    "Original ResNet": "-",
+    "L2 Regularized ResNet": "--",
+    "Ensemble ResNet": "-.",
+    "Transfer ResNet Frozen": ":",
+}
 
 
 def load_results():
@@ -30,7 +40,7 @@ def load_results():
     # Load ensemble results
     results["Ensemble ResNet"] = load_pickled_artifacts("ensemble_results.pkl")
     print("Loaded ensemble results")
-    results["Transfer ResNet Frozen"]= load_pickled_artifacts("finetune_results.pkl")
+    results["Transfer ResNet Frozen"] = load_pickled_artifacts("finetune_results.pkl")
     print("Loaded transfer results")
     return results
 

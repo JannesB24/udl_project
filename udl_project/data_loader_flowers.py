@@ -60,7 +60,6 @@ class DataLoaderFlowers:
         batch_size: int = BATCH_SIZE,
         num_workers: int = NUM_WORKERS,
         image_dim: tuple = IMAGE_DIM,
-
     ) -> "DataLoaderFlowers":
         """Creates an instance of the DataLoaderFlowers class.
 
@@ -73,10 +72,10 @@ class DataLoaderFlowers:
         Returns:
             DataLoaderFlowers: DataLoaderFlowers instance
         """
-  
+
         # Download latest version
         data_directory = Path(kagglehub.dataset_download("lara311/flowers-five-classes"))
-        #data_directory = Path(kagglehub.dataset_download("msarmi9/food101tiny"))
+        # data_directory = Path(kagglehub.dataset_download("msarmi9/food101tiny"))
         print(f"Data directory: {data_directory}")
 
         simple_transform = transforms.Compose(
@@ -121,8 +120,8 @@ class DataLoaderFlowers:
             print("No dataset")
             return
         # Download latest version
-        #data_directory = Path(kagglehub.dataset_download("lara311/flowers-five-classes"))
-        #data_directory = Path(kagglehub.dataset_download("msarmi9/food101tiny"))
+        # data_directory = Path(kagglehub.dataset_download("lara311/flowers-five-classes"))
+        # data_directory = Path(kagglehub.dataset_download("msarmi9/food101tiny"))
         data_directory = Path(kagglehub.dataset_download(kagglePath))
         print(f"Data directory: {data_directory}")
 

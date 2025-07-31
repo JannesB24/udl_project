@@ -10,34 +10,36 @@ from udl_project.models.res_net import ResNet
 from udl_project.training.abstract_trainer import Trainer
 from udl_project.utils.weights import weights_init
 
+
 def loadTfL_ResNetModel(prev_numclasses, new_numclasses, freezeOriginal):
     model = ResNet(num_classes=prev_numclasses)
     model.load_state_dict(torch.load(config.ARTIFACTS_DIR / "pretraining_model.pth"))
     if freezeOriginal:
         for param in model.parameters():
             param.requires_grad = False
-    model.classifier=nn.Linear(256 * 8 * 8, new_numclasses)
+    model.classifier = nn.Linear(256 * 8 * 8, new_numclasses)
     return model
 
 
 class ResNetModelTFLTrainer(Trainer):
-    prev_numclasses= 10
-    ft_numclasses= 5
-    dataset= ""
-    finetune_bool=False
+    prev_numclasses = 10
+    ft_numclasses = 5
+    dataset = ""
+    finetune_bool = False
     freeze = False
+
     def __init__(self, *, epochs: int, learning_rate: float):
         super().__init__()
         self.epochs = epochs
         self.learning_rate = learning_rate
 
-    def train(self,numclasses,dataset):
+    def train(self, numclasses, dataset):
         print("=" * 60)
         print("PRETRAINING ORIGINAL RESNET MODEL")
         print("=" * 60)
-        self.prev_numclasses=numclasses
-        self.dataset=dataset
-        self.finetune_bool=False
+        self.prev_numclasses = numclasses
+        self.dataset = dataset
+        self.finetune_bool = False
         print(self.dataset)
         train_accs, val_accs = self._train()
 
@@ -45,15 +47,14 @@ class ResNetModelTFLTrainer(Trainer):
         print(f"Final overfitting gap: {train_accs[-1] - val_accs[-1]:.4f}")
         print(f"Results saved to {config.ARTIFACTS_DIR / 'pretrain_results.pkl'}")
 
-
-    def finetune_model(self,numclasses, dataset,freeze):
+    def finetune_model(self, numclasses, dataset, freeze):
         print("=" * 60)
         print("FINETUNING RESNET MODEL")
         print("=" * 60)
-        self.ft_numclasses=numclasses
-        self.dataset=dataset
-        self.finetune_bool=True
-        self.freeze=freeze
+        self.ft_numclasses = numclasses
+        self.dataset = dataset
+        self.finetune_bool = True
+        self.freeze = freeze
         train_accs, val_accs = self._train()
 
         print("\nFinetuning model training completed!")
@@ -65,13 +66,13 @@ class ResNetModelTFLTrainer(Trainer):
 
         # call with standard parameters
 
-        data_loader = DataLoaderFlowers.create_dataloader_Pathchoice( kagglePath=self.dataset)
+        data_loader = DataLoaderFlowers.create_dataloader_Pathchoice(kagglePath=self.dataset)
         # create model and initialize parameters
         if self.finetune_bool:
-            model = loadTfL_ResNetModel(self.prev_numclasses,self.ft_numclasses, self.freeze)
+            model = loadTfL_ResNetModel(self.prev_numclasses, self.ft_numclasses, self.freeze)
         else:
             model = ResNet(num_classes=self.prev_numclasses)
-            
+
         model.apply(weights_init)
 
         # choose loss function and optimizer
@@ -85,11 +86,11 @@ class ResNetModelTFLTrainer(Trainer):
         val_accs = np.zeros(self.epochs)
 
         print("Training Unregularized ResNet...")
-        save_str_prefix="pretraining"
+        save_str_prefix = "pretraining"
         if self.finetune_bool:
-            save_str_prefix="finetune"
+            save_str_prefix = "finetune"
 
-        save_str= save_str_prefix + "_model.pth"
+        save_str = save_str_prefix + "_model.pth"
         for epoch in range(self.epochs):
             model.train()
             t0 = datetime.now()
@@ -157,10 +158,8 @@ class ResNetModelTFLTrainer(Trainer):
             )
 
         # Save the model
-#        torch.save(model.state_dict(), config.ARTIFACTS_DIR / "flower_classification_model.pth")
-       
-       
-       
+        #        torch.save(model.state_dict(), config.ARTIFACTS_DIR / "flower_classification_model.pth")
+
         torch.save(model.state_dict(), config.ARTIFACTS_DIR / save_str)
 
         # Save results for comparison
@@ -177,8 +176,6 @@ class ResNetModelTFLTrainer(Trainer):
             pickle.dump(original_results, f)
 
         return train_accs, val_accs
-
-
 
 
 if __name__ == "__main__":
