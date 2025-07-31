@@ -60,6 +60,7 @@ class DataLoaderFlowers:
         batch_size: int = BATCH_SIZE,
         num_workers: int = NUM_WORKERS,
         image_dim: tuple = IMAGE_DIM,
+        augment_data: bool = False,
     ) -> "DataLoaderFlowers":
         """Creates an instance of the DataLoaderFlowers class.
 
@@ -68,28 +69,38 @@ class DataLoaderFlowers:
             batch_size (int): Number of samples per batch.
             num_workers (int): Number of subprocesses to use for data loading.
             image_dim (tuple): Dimensions to which images will be resized (square).
+            augment_data (bool): Whether to apply data augmentation or not.
 
         Returns:
             DataLoaderFlowers: DataLoaderFlowers instance
         """
+        import torch
+
         train_transform = v2.Compose(
             [
                 v2.RandomResizedCrop(image_dim, scale=(0.8, 1.0), antialias=True),
                 v2.RandomHorizontalFlip(),
-                v2.RandomRotation(degrees=90),
+                v2.RandomRotation(degrees=45),  # +- 45 degrees
                 v2.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.3, hue=0.1),
-                v2.ToTensor(),
+                v2.ToImage(),
+                v2.ToDtype(torch.float32, scale=True),
             ]
         )
 
         non_train_transform = v2.Compose(
             [
-                v2.Resize(image_dim),
-                v2.ToTensor(),
+                v2.Resize(image_dim, antialias=True),
+                v2.CenterCrop(image_dim),
+                v2.ToImage(),
+                v2.ToDtype(torch.float32, scale=True),
             ]
         )
 
-        train_data = flower_data_source.get_train_subset(train_transform)
+        if augment_data:
+            train_data = flower_data_source.get_train_subset(train_transform)
+        else:
+            train_data = flower_data_source.get_train_subset(non_train_transform)
+
         test_data = flower_data_source.get_test_subset(non_train_transform)
 
         # Create a DataLoaderFlowers instance using the split datasets

@@ -7,6 +7,7 @@ from torch import nn
 
 from udl_project import config
 from udl_project.data_handling.data_loader_flowers import DataLoaderFlowers
+from udl_project.data_handling.flower_dataset import FlowerDataset
 from udl_project.models.res_net import ResNet
 from udl_project.training.abstract_trainer import Trainer
 from udl_project.utils.weights import weights_init
@@ -32,8 +33,8 @@ class ResNetModelTrainer(Trainer):
     def _train(self) -> tuple[np.ndarray, np.ndarray]:
         device = torch.device("cpu")
 
-        # call with standard parameters
-        data_loader = DataLoaderFlowers.create_dataloader()
+        flower_dataset = FlowerDataset(train_test_spilt=0.8)
+        data_loader = DataLoaderFlowers.create_dataloader(flower_dataset)
 
         # create model and initialize parameters
         model = ResNet(num_classes=data_loader.num_classes)

@@ -26,7 +26,7 @@ class DataAugmentation(Trainer):
 
         train_accs, val_accs = self._train()
 
-        print(r"\Data augmented model training completed!")
+        print("Data augmented model training completed!")
         print(f"Final overfitting gap: {train_accs[-1] - val_accs[-1]:.4f}")
         print(f"Results saved to {config.ARTIFACTS_DIR / 'augmented_results.pkl'}")
 
@@ -34,7 +34,7 @@ class DataAugmentation(Trainer):
         device = torch.device("cpu")
 
         flower_dataset = FlowerDataset(train_test_spilt=0.8)
-        data_loader = DataLoaderFlowers.create_dataloader(flower_dataset)
+        data_loader = DataLoaderFlowers.create_dataloader(flower_dataset, augment_data=True)
 
         # create model and initialize parameters
         model = ResNet(num_classes=data_loader.num_classes)
