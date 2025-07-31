@@ -36,12 +36,12 @@ class SubsetFlowerWrapper(Dataset):
 
 
 class FlowerDataset:
-    def __init__(self, train_test_spilt: float):
+    def __init__(self, train_test_split: float):
         _data_directory = self._fetch_data()
 
         _train_test_dataset = datasets.ImageFolder(_data_directory / "train")
 
-        _train_size = int(train_test_spilt * len(_train_test_dataset))
+        _train_size = int(train_test_split * len(_train_test_dataset))
         _test_size = len(_train_test_dataset) - _train_size
 
         self.train_data, self.test_data = random_split(

@@ -40,7 +40,7 @@ class L2RegularizedModelTrainer(Trainer):
 
         device = torch.device("cpu")
 
-        flower_dataset = FlowerDataset(train_test_spilt=0.8)
+        flower_dataset = FlowerDataset(train_test_split=0.8)
         data_loader = DataLoaderFlowers.create_dataloader(flower_dataset)
 
         # Create model exactly the unregularized

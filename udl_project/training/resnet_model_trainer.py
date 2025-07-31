@@ -33,8 +33,8 @@ class ResNetModelTrainer(Trainer):
     def _train(self) -> tuple[np.ndarray, np.ndarray]:
         device = torch.device("cpu")
 
-        flower_dataset = FlowerDataset(train_test_spilt=0.8)
-        data_loader = DataLoaderFlowers.create_dataloader(flower_dataset)
+        flower_dataset = FlowerDataset(train_test_split=0.8)
+        data_loader = DataLoaderFlowers.create_dataloader(flower_dataset, augment_data=False)
 
         # create model and initialize parameters
         model = ResNet(num_classes=data_loader.num_classes)

@@ -38,7 +38,7 @@ class EnsembleModelTrainer(Trainer):
 
         device = torch.device("cpu")
 
-        flower_dataset = FlowerDataset(train_test_spilt=0.8)
+        flower_dataset = FlowerDataset(train_test_split=0.8)
         data_loader = DataLoaderFlowers.create_dataloader(flower_dataset)
 
         model = EnsembleModel(num_classes=data_loader.num_classes, num_models=self.num_models)

@@ -33,7 +33,7 @@ class DataAugmentation(Trainer):
     def _train(self) -> tuple[np.ndarray, np.ndarray]:
         device = torch.device("cpu")
 
-        flower_dataset = FlowerDataset(train_test_spilt=0.8)
+        flower_dataset = FlowerDataset(train_test_split=0.8)
         data_loader = DataLoaderFlowers.create_dataloader(flower_dataset, augment_data=True)
 
         # create model and initialize parameters
