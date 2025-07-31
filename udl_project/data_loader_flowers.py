@@ -60,6 +60,7 @@ class DataLoaderFlowers:
         batch_size: int = BATCH_SIZE,
         num_workers: int = NUM_WORKERS,
         image_dim: tuple = IMAGE_DIM,
+
     ) -> "DataLoaderFlowers":
         """Creates an instance of the DataLoaderFlowers class.
 
@@ -72,8 +73,10 @@ class DataLoaderFlowers:
         Returns:
             DataLoaderFlowers: DataLoaderFlowers instance
         """
+  
         # Download latest version
         data_directory = Path(kagglehub.dataset_download("lara311/flowers-five-classes"))
+        #data_directory = Path(kagglehub.dataset_download("msarmi9/food101tiny"))
         print(f"Data directory: {data_directory}")
 
         simple_transform = transforms.Compose(
@@ -85,6 +88,55 @@ class DataLoaderFlowers:
         dataset = datasets.ImageFolder(data_directory / "train", transform=simple_transform)
         train_size = int(0.8 * len(dataset))
         test_size = len(dataset) - train_size
+
+        print(f"set size: {len(dataset.classes)}")
+
+        return DataLoaderFlowers(
+            dataset=dataset,
+            train_size=train_size,
+            test_size=test_size,
+            batch_size=batch_size,
+            num_workers=num_workers,
+        )
+
+    @staticmethod
+    def create_dataloader_Pathchoice(
+        batch_size: int = BATCH_SIZE,
+        num_workers: int = NUM_WORKERS,
+        image_dim: tuple = IMAGE_DIM,
+        kagglePath: str = "",
+    ) -> "DataLoaderFlowers":
+        """Creates an instance of the DataLoaderFlowers class.
+
+        Args:
+            data_directory (Path): Path to the directory containing the image dataset.
+            batch_size (int): Number of samples per batch.
+            num_workers (int): Number of subprocesses to use for data loading.
+            image_dim (tuple): Dimensions to which images will be resized (square).
+
+        Returns:
+            DataLoaderFlowers: DataLoaderFlowers instance
+        """
+        if kagglePath == "":
+            print("No dataset")
+            return
+        # Download latest version
+        #data_directory = Path(kagglehub.dataset_download("lara311/flowers-five-classes"))
+        #data_directory = Path(kagglehub.dataset_download("msarmi9/food101tiny"))
+        data_directory = Path(kagglehub.dataset_download(kagglePath))
+        print(f"Data directory: {data_directory}")
+
+        simple_transform = transforms.Compose(
+            [
+                transforms.Resize(image_dim),
+                transforms.ToTensor(),
+            ]
+        )
+        dataset = datasets.ImageFolder(data_directory / "train", transform=simple_transform)
+        train_size = int(0.8 * len(dataset))
+        test_size = len(dataset) - train_size
+
+        print(f"set size: {len(dataset.classes)}")
 
         return DataLoaderFlowers(
             dataset=dataset,
