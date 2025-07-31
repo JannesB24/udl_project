@@ -7,8 +7,18 @@ import numpy as np
 from udl_project import config
 from udl_project.utils.data_loading import load_pickled_artifacts
 
-COLORS = {"Original ResNet": "red", "L2 Regularized ResNet": "blue", "Ensemble ResNet": "green"}
-LINESTYLES = {"Original ResNet": "-", "L2 Regularized ResNet": "--", "Ensemble ResNet": "-."}
+COLORS = {
+    "Original ResNet": "red",
+    "L2 Regularized ResNet": "blue",
+    "Ensemble ResNet": "green",
+    "Data Augmented ResNet": "purple",
+}
+LINESTYLES = {
+    "Original ResNet": "-",
+    "L2 Regularized ResNet": "--",
+    "Ensemble ResNet": "-.",
+    "Data Augmented ResNet": ":",
+}
 
 
 def load_results():
@@ -29,6 +39,10 @@ def load_results():
     # Load ensemble results
     results["Ensemble ResNet"] = load_pickled_artifacts("ensemble_results.pkl")
     print("Loaded ensemble results")
+
+    # Load data augmentation results
+    results["Data Augmented ResNet"] = load_pickled_artifacts("augmented_results.pkl")
+    print("Loaded data augmentation results")
 
     return results
 
