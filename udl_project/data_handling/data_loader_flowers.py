@@ -156,6 +156,20 @@ class DataLoaderFlowers:
 
         print(f"set size: {len(dataset.classes)}")
 
+        if augment_data:
+            train_data = flower_data_source.get_train_subset(train_transform)
+        else:
+            train_data = flower_data_source.get_train_subset(non_train_transform)
+
+        test_data = flower_data_source.get_test_subset(non_train_transform)
+
+        loader = DataLoaderFlowers(
+            train_data=train_data,
+            test_data=test_data,
+            batch_size=batch_size,
+            num_workers=num_workers,
+        )
+
         return DataLoaderFlowers(
             dataset=dataset,
             train_size=train_size,

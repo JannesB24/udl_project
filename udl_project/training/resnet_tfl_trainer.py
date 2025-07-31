@@ -5,7 +5,7 @@ import torch.nn as nn
 from datetime import datetime
 
 from udl_project import config
-from udl_project.data_loader_flowers import DataLoaderFlowers
+from udl_project.data_handling.data_loader_flowers import DataLoaderFlowers
 from udl_project.models.res_net import ResNet
 from udl_project.training.abstract_trainer import Trainer
 from udl_project.utils.weights import weights_init
