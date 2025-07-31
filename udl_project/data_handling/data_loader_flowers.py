@@ -119,9 +119,11 @@ class DataLoaderFlowers:
        
     @staticmethod
     def create_dataloader_Pathchoice(
+        flower_data_source: FlowerDataset,
         batch_size: int = BATCH_SIZE,
         num_workers: int = NUM_WORKERS,
         image_dim: tuple = IMAGE_DIM,
+        augment_data: bool = False,
         kagglePath: str = "",
     ) -> "DataLoaderFlowers":
         """Creates an instance of the DataLoaderFlowers class.
@@ -156,6 +158,25 @@ class DataLoaderFlowers:
 
         print(f"set size: {len(dataset.classes)}")
 
+        train_transform = v2.Compose(
+            [
+                v2.RandomResizedCrop(image_dim, scale=(0.8, 1.0), antialias=True),
+                v2.RandomHorizontalFlip(),
+                v2.RandomRotation(degrees=45),  # +- 45 degrees
+                v2.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.3, hue=0.1),
+                v2.ToImage(),
+                v2.ToDtype(torch.float32, scale=True),
+            ]
+        )
+        non_train_transform = v2.Compose(
+            [
+                v2.Resize(image_dim, antialias=True),
+                v2.CenterCrop(image_dim),
+                v2.ToImage(),
+                v2.ToDtype(torch.float32, scale=True),
+            ]
+        )
+
         if augment_data:
             train_data = flower_data_source.get_train_subset(train_transform)
         else:
@@ -170,13 +191,6 @@ class DataLoaderFlowers:
             num_workers=num_workers,
         )
 
-        return DataLoaderFlowers(
-            dataset=dataset,
-            train_size=train_size,
-            test_size=test_size,
-            batch_size=batch_size,
-            num_workers=num_workers,
-        )
-
+        return loader
 
 

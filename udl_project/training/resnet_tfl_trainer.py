@@ -9,7 +9,7 @@ from udl_project.data_handling.data_loader_flowers import DataLoaderFlowers
 from udl_project.models.res_net import ResNet
 from udl_project.training.abstract_trainer import Trainer
 from udl_project.utils.weights import weights_init
-
+from udl_project.data_handling.flower_dataset import FlowerDataset
 
 def loadTfL_ResNetModel(prev_numclasses, new_numclasses, freezeOriginal):
     model = ResNet(num_classes=prev_numclasses)
@@ -65,8 +65,8 @@ class ResNetModelTFLTrainer(Trainer):
         device = torch.device("cpu")
 
         # call with standard parameters
-
-        data_loader = DataLoaderFlowers.create_dataloader_Pathchoice(kagglePath=self.dataset)
+        flower_dataset = FlowerDataset(train_test_split=0.8)
+        data_loader = DataLoaderFlowers.create_dataloader_Pathchoice(kagglePath=self.dataset,flower_data_source=flower_dataset,augment_data=False)
         # create model and initialize parameters
         if self.finetune_bool:
             model = loadTfL_ResNetModel(self.prev_numclasses, self.ft_numclasses, self.freeze)
