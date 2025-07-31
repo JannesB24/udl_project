@@ -1,11 +1,13 @@
+import pickle
+from datetime import datetime
+
 import numpy as np
 import torch
-import torch.nn as nn
-from datetime import datetime
-import pickle
+from torch import nn
 
 from udl_project import config
-from udl_project.data_loader_flowers import DataLoaderFlowers
+from udl_project.data_handling.data_loader_flowers import DataLoaderFlowers
+from udl_project.data_handling.flower_dataset import FlowerDataset
 from udl_project.models.res_net import ResNet
 from udl_project.training.abstract_trainer import Trainer
 from udl_project.utils.weights import weights_init
@@ -38,8 +40,8 @@ class L2RegularizedModelTrainer(Trainer):
 
         device = torch.device("cpu")
 
-        # call with standard parameters
-        data_loader = DataLoaderFlowers.create_dataloader()
+        flower_dataset = FlowerDataset(train_test_split=0.8)
+        data_loader = DataLoaderFlowers.create_dataloader(flower_dataset)
 
         # Create model exactly the unregularized
         model = ResNet(num_classes=data_loader.num_classes)
@@ -71,20 +73,20 @@ class L2RegularizedModelTrainer(Trainer):
 
             # Training phase
             for images, labels in data_loader.get_train_dataloader():
-                images = images.to(device)
-                labels = labels.to(device)
+                images_device = images.to(device)
+                labels_device = labels.to(device)
 
                 optimizer.zero_grad()
-                y_pred = model(images)
-                loss = criterion(y_pred, labels)
+                y_pred = model(images_device)
+                loss = criterion(y_pred, labels_device)
                 loss.backward()
                 optimizer.step()
 
                 train_loss.append(loss.item())
 
                 _, predicted_labels = torch.max(y_pred, 1)
-                n_correct_train += (predicted_labels == labels).sum().item()
-                n_total_train += labels.shape[0]
+                n_correct_train += (predicted_labels == labels_device).sum().item()
+                n_total_train += labels_device.shape[0]
 
             train_loss = np.mean(train_loss)
             train_losses[epoch] = train_loss
@@ -96,16 +98,16 @@ class L2RegularizedModelTrainer(Trainer):
             n_total_val = 0
             with torch.no_grad():
                 for images, labels in data_loader.get_test_dataloader():
-                    images = images.to(device)
-                    labels = labels.to(device)
+                    images_device = images.to(device)
+                    labels_device = labels.to(device)
 
-                    y_pred = model(images)
-                    loss = criterion(y_pred, labels)
+                    y_pred = model(images_device)
+                    loss = criterion(y_pred, labels_device)
                     val_loss.append(loss.item())
 
                     _, predicted_labels = torch.max(y_pred, 1)
-                    n_correct_val += (predicted_labels == labels).sum().item()
-                    n_total_val += labels.shape[0]
+                    n_correct_val += (predicted_labels == labels_device).sum().item()
+                    n_total_val += labels_device.shape[0]
 
             val_loss = np.mean(val_loss)
             val_losses[epoch] = val_loss
@@ -132,7 +134,7 @@ class L2RegularizedModelTrainer(Trainer):
             "model_name": f"L2 Regularized (wd={self.weight_decay})",
         }
 
-        with open(config.ARTIFACTS_DIR / "l2_results.pkl", "wb") as f:
+        with (config.ARTIFACTS_DIR / "l2_results.pkl").open("wb") as f:
             pickle.dump(l2_results, f)
 
         # Print summary for this configuration

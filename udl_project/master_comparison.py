@@ -1,5 +1,4 @@
-from typing import List, Tuple
-import matplotlib
+import matplotlib as mpl
 
 from udl_project.plotter import plot
 from udl_project.training import config
@@ -8,7 +7,7 @@ from udl_project.training.ensemble_model_trainer import EnsembleModelTrainer
 from udl_project.training.l2_regularized_model_trainer import L2RegularizedModelTrainer
 from udl_project.training.resnet_model_trainer import ResNetModelTrainer
 
-matplotlib.use("Agg")
+mpl.use("Agg")
 
 
 def run_all_trainings():
@@ -16,15 +15,15 @@ def run_all_trainings():
     print("RUNNING ALL TRAININGS")
     print("=" * 60)
 
-    trainer: List[Tuple[AbstractTrainer, str]] = [
+    trainer: list[tuple[AbstractTrainer, str]] = [
         (ResNetModelTrainer(learning_rate=config.LEARNING_RATE, epochs=10), "Original ResNet"),
         (L2RegularizedModelTrainer(config.WEIGHT_DECAY, epochs=10), "L2 Regularized ResNet"),
         (EnsembleModelTrainer(config.NUMBER_OF_ENSEMBLE_MODELS, epochs=10), "Ensemble ResNet"),
     ]
 
-    for Trainer, name in trainer:
+    for trainer_instance, name in trainer:
         print(f"\n  Running {name}...")
-        Trainer.train()
+        trainer_instance.train()
         print(f"{name} completed successfully")
 
     print("\nAll trainings completed!")
