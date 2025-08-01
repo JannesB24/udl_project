@@ -6,7 +6,7 @@ import torch
 from torch import nn
 
 from udl_project import config
-from udl_project.data_handling.data_loader_flowers import DataLoaderFlowers
+from udl_project.data_handling.custom_data_loader import CustomDataLoader
 from udl_project.data_handling.flower_dataset import FlowerDataset
 from udl_project.models.res_net import ResNet
 from udl_project.training.abstract_trainer import Trainer
@@ -34,7 +34,7 @@ class DataAugmentation(Trainer):
         device = torch.device("cpu")
 
         flower_dataset = FlowerDataset(train_test_split=0.8)
-        data_loader = DataLoaderFlowers.create_dataloader(flower_dataset, augment_data=True)
+        data_loader = CustomDataLoader.create_dataloader(flower_dataset, augment_data=True)
 
         # create model and initialize parameters
         model = ResNet(num_classes=data_loader.num_classes)

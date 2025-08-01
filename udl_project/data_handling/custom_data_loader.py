@@ -1,18 +1,18 @@
 import logging
 import os
+from typing import Any
 
+import torch
 from torch.utils.data import DataLoader, Dataset
 from torchvision.transforms import v2
 
-from udl_project.data_handling.flower_dataset import FlowerDataset
-
 # TODO: possibly relocate to config file or make them accessible for other modules!?
 BATCH_SIZE = 32
-IMAGE_DIM = (224, 224)
+IMAGE_DIM = (64, 64)
 NUM_WORKERS = os.cpu_count()
 
 
-class DataLoaderFlowers:
+class CustomDataLoader:
     def __init__(
         self,
         train_data: Dataset,
@@ -56,27 +56,25 @@ class DataLoaderFlowers:
 
     @staticmethod
     def create_dataloader(
-        flower_data_source: FlowerDataset,
+        data_source: Any,
         batch_size: int = BATCH_SIZE,
         num_workers: int = NUM_WORKERS,
         image_dim: tuple = IMAGE_DIM,
         augment_data: bool = False,
-    ) -> "DataLoaderFlowers":
-        """Creates an instance of the DataLoaderFlowers class.
+    ) -> "CustomDataLoader":
+        """Creates an instance of the CustomDataLoader class.
 
         Args:
-            flower_data_source (FlowerDataset): Source dataset containing flower images and labels.
+            data_source (Any): Source dataset containing images and labels.
             batch_size (int): Number of samples per batch.
             num_workers (int): Number of subprocesses to use for data loading.
             image_dim (tuple): Dimensions to which images will be resized (square).
             augment_data (bool): Whether to apply data augmentation or not.
 
         Returns:
-            DataLoaderFlowers: DataLoaderFlowers instance
+            CustomDataLoader: CustomDataLoader instance
         """
-        import torch
-
-        train_transform = v2.Compose(
+        augment_transform = v2.Compose(
             [
                 v2.RandomResizedCrop(image_dim, scale=(0.8, 1.0), antialias=True),
                 v2.RandomHorizontalFlip(),
@@ -86,8 +84,7 @@ class DataLoaderFlowers:
                 v2.ToDtype(torch.float32, scale=True),
             ]
         )
-
-        non_train_transform = v2.Compose(
+        not_augment_transform = v2.Compose(
             [
                 v2.Resize(image_dim, antialias=True),
                 v2.CenterCrop(image_dim),
@@ -97,14 +94,14 @@ class DataLoaderFlowers:
         )
 
         if augment_data:
-            train_data = flower_data_source.get_train_subset(train_transform)
+            train_data = data_source.get_train_subset(augment_transform)
         else:
-            train_data = flower_data_source.get_train_subset(non_train_transform)
+            train_data = data_source.get_train_subset(not_augment_transform)
 
-        test_data = flower_data_source.get_test_subset(non_train_transform)
+        test_data = data_source.get_test_subset(not_augment_transform)
 
-        # Create a DataLoaderFlowers instance using the split datasets
-        loader = DataLoaderFlowers(
+        # Create a CustomDataLoader instance using the split datasets
+        loader = CustomDataLoader(
             train_data=train_data,
             test_data=test_data,
             batch_size=batch_size,

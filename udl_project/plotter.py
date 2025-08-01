@@ -11,12 +11,14 @@ COLORS = {
     "Original ResNet": "red",
     "L2 Regularized ResNet": "blue",
     "Ensemble ResNet": "green",
+    "Transfer ResNet Frozen": "yellow",
     "Data Augmented ResNet": "purple",
 }
 LINESTYLES = {
     "Original ResNet": "-",
     "L2 Regularized ResNet": "--",
     "Ensemble ResNet": "-.",
+    "Transfer ResNet Frozen": ":",
     "Data Augmented ResNet": ":",
 }
 
@@ -39,6 +41,8 @@ def load_results():
     # Load ensemble results
     results["Ensemble ResNet"] = load_pickled_artifacts("ensemble_results.pkl")
     print("Loaded ensemble results")
+    results["Transfer ResNet Frozen"] = load_pickled_artifacts("finetune_results.pkl")
+    print("Loaded transfer results")
 
     # Load data augmentation results
     results["Data Augmented ResNet"] = load_pickled_artifacts("augmented_results.pkl")
