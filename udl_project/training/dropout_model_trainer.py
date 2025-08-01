@@ -1,4 +1,3 @@
-from udl_project.training.resnet_model_trainer import ResNetModelTrainer
 import pickle
 from datetime import datetime
 
@@ -8,16 +7,16 @@ from torch import nn
 
 from udl_project import config
 from udl_project.data_loader_flowers import DataLoaderFlowers
-from udl_project.models.res_net import ResNet
-
-from udl_project.utils.weights import weights_init
 from udl_project.models.dropout_res_net import DPResNet
+from udl_project.training.resnet_model_trainer import ResNetModelTrainer
+from udl_project.utils.weights import weights_init
+
 
 class DropoutModelTrainer(ResNetModelTrainer):
     def __init__(self, *, epochs, learning_rate, dp_rate):
         self.dp = dp_rate
         super().__init__(epochs=epochs, learning_rate=learning_rate)
-    
+
     def _train(self) -> tuple[np.ndarray, np.ndarray]:
         device = torch.device("cpu")
 
@@ -25,7 +24,7 @@ class DropoutModelTrainer(ResNetModelTrainer):
         data_loader = DataLoaderFlowers.create_dataloader()
 
         # create model and initialize parameters
-        model = DPResNet(num_classes=data_loader.num_classes,dp_rate=self.dp)
+        model = DPResNet(num_classes=data_loader.num_classes, dp_rate=self.dp)
         model.apply(weights_init)
 
         # choose loss function and optimizer
@@ -107,7 +106,9 @@ class DropoutModelTrainer(ResNetModelTrainer):
             )
 
         # Save the model
-        torch.save(model.state_dict(), config.ARTIFACTS_DIR / "flower_classification_dropout_model.pth")
+        torch.save(
+            model.state_dict(), config.ARTIFACTS_DIR / "flower_classification_dropout_model.pth"
+        )
 
         # Save results for comparison
         original_results = {

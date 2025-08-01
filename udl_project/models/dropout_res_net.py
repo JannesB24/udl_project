@@ -1,14 +1,14 @@
 import torch
 from torch import nn
-from udl_project.models.res_net import ResNet, Bottleneck
+
+from udl_project.models.res_net import Bottleneck, ResNet
 
 
 class DPBottleneck(Bottleneck):
-    def __init__(self, in_channels, bottleneck_channels, out_channels, stride = 1,dp_rate= 0.5):
+    def __init__(self, in_channels, bottleneck_channels, out_channels, stride=1, dp_rate=0.5):
         super().__init__(in_channels, bottleneck_channels, out_channels, stride)
-        self.dropout = nn.Dropout(p=dp_rate) 
-   
-    
+        self.dropout = nn.Dropout(p=dp_rate)
+
     def forward(self, x: torch.Tensor):
         out = self.dropout(self.conv1(self.relu(self.bn1(x))))
         out = self.dropout(self.conv2(self.relu(self.bn2(out))))
@@ -16,11 +16,12 @@ class DPBottleneck(Bottleneck):
         out += self.shortcut(x)
         return out
 
+
 class DPResNet(ResNet):
-    def __init__(self, num_classes,dp_rate):
+    def __init__(self, num_classes, dp_rate):
         super().__init__(num_classes)
         in_channels = 3
-        self.dropout = nn.Dropout(p=dp_rate) 
+        self.dropout = nn.Dropout(p=dp_rate)
         self.pre = nn.Sequential(
             nn.Conv2d(
                 in_channels=in_channels,
@@ -36,22 +37,18 @@ class DPResNet(ResNet):
         )
 
         # First bottleneck block: input 64 channels, bottleneck 16, output 64
-        self.bottleneck_one = DPBottleneck(in_channels=64, bottleneck_channels=16, out_channels=64,dp_rate=dp_rate)
+        self.bottleneck_one = DPBottleneck(
+            in_channels=64, bottleneck_channels=16, out_channels=64, dp_rate=dp_rate
+        )
 
         # Second bottleneck block: input 64 channels, bottleneck 32, output 128
         self.bottleneck_two = DPBottleneck(
-            in_channels=64,
-            bottleneck_channels=32,
-            out_channels=128,
-            dp_rate=dp_rate
+            in_channels=64, bottleneck_channels=32, out_channels=128, dp_rate=dp_rate
         )
 
         # Third bottleneck block: input 128 channels, bottleneck 64, output 256
         self.bottleneck_three = DPBottleneck(
-            in_channels=128,
-            bottleneck_channels=64,
-            out_channels=256,
-            dp_rate=dp_rate
+            in_channels=128, bottleneck_channels=64, out_channels=256, dp_rate=dp_rate
         )
 
         # Global pooling to reduce spatial dimensions
