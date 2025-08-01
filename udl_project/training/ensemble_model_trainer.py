@@ -6,7 +6,7 @@ import torch
 from torch import nn
 
 from udl_project import config
-from udl_project.data_handling.data_loader_flowers import DataLoaderFlowers
+from udl_project.data_handling.custom_data_loader import CustomDataLoader
 from udl_project.data_handling.flower_dataset import FlowerDataset
 from udl_project.models.ensemble_model import EnsembleModel
 from udl_project.training.abstract_trainer import Trainer
@@ -39,7 +39,7 @@ class EnsembleModelTrainer(Trainer):
         device = torch.device("cpu")
 
         flower_dataset = FlowerDataset(train_test_split=0.8)
-        data_loader = DataLoaderFlowers.create_dataloader(flower_dataset)
+        data_loader = CustomDataLoader.create_dataloader(flower_dataset)
 
         model = EnsembleModel(num_classes=data_loader.num_classes, num_models=self.num_models)
         model.to(device)

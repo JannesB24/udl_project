@@ -7,8 +7,6 @@ import numpy as np
 from udl_project import config
 from udl_project.utils.data_loading import load_pickled_artifacts
 
-
-
 COLORS = {
     "Original ResNet": "red",
     "L2 Regularized ResNet": "blue",

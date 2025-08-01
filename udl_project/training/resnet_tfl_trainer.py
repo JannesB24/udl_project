@@ -1,20 +1,25 @@
 import pickle
+from datetime import datetime
+from typing import Any
+
 import numpy as np
 import torch
-import torch.nn as nn
-from datetime import datetime
+from torch import nn
 
 from udl_project import config
-from udl_project.data_handling.data_loader_flowers import DataLoaderFlowers
+from udl_project.data_handling.custom_data_loader import CustomDataLoader
+from udl_project.data_handling.flower_dataset import FlowerDataset
+from udl_project.data_handling.food_dataset import FoodDataset
 from udl_project.models.res_net import ResNet
 from udl_project.training.abstract_trainer import Trainer
 from udl_project.utils.weights import weights_init
-from udl_project.data_handling.flower_dataset import FlowerDataset
 
-def loadTfL_ResNetModel(prev_numclasses, new_numclasses, freezeOriginal):
-    model = ResNet(num_classes=prev_numclasses)
+
+def load_tfl_model(new_numclasses, freeze_original):
+    # Load pretrained model (10 classes -> food dataset)
+    model = ResNet(num_classes=10)
     model.load_state_dict(torch.load(config.ARTIFACTS_DIR / "pretraining_model.pth"))
-    if freezeOriginal:
+    if freeze_original:
         for param in model.parameters():
             param.requires_grad = False
     model.classifier = nn.Linear(256 * 8 * 8, new_numclasses)
@@ -33,47 +38,64 @@ class ResNetModelTFLTrainer(Trainer):
         self.epochs = epochs
         self.learning_rate = learning_rate
 
-    def train(self, numclasses, dataset):
+    def train(self):
         print("=" * 60)
         print("PRETRAINING ORIGINAL RESNET MODEL")
         print("=" * 60)
-        self.prev_numclasses = numclasses
-        self.dataset = dataset
-        self.finetune_bool = False
-        print(self.dataset)
-        train_accs, val_accs = self._train()
 
-        print("\pretraining model training completed!")
+        pre_train_data_source = FoodDataset()
+        # Pre-train model
+        train_accs, val_accs = self._train(
+            data_source=pre_train_data_source,
+        )
+
+        print("Pretraining model training completed!")
         print(f"Final overfitting gap: {train_accs[-1] - val_accs[-1]:.4f}")
         print(f"Results saved to {config.ARTIFACTS_DIR / 'pretrain_results.pkl'}")
 
-    def finetune_model(self, numclasses, dataset, freeze):
         print("=" * 60)
         print("FINETUNING RESNET MODEL")
         print("=" * 60)
-        self.ft_numclasses = numclasses
-        self.dataset = dataset
-        self.finetune_bool = True
-        self.freeze = freeze
-        train_accs, val_accs = self._train()
+
+        finetune_dataset = FlowerDataset(train_test_split=0.8)
+
+        # Finetune model
+        train_accs, val_accs = self._train(data_source=finetune_dataset)
 
         print("\nFinetuning model training completed!")
         print(f"Final overfitting gap: {train_accs[-1] - val_accs[-1]:.4f}")
         print(f"Results saved to {config.ARTIFACTS_DIR / 'finetune_results.pkl'}")
 
-    def _train(self) -> tuple[np.ndarray, np.ndarray]:
+        print("=" * 60)
+        print("FINETUNING RESNET MODEL")
+        print("=" * 60)
+
+        finetune_dataset = FlowerDataset(train_test_split=0.8)
+
+        # Finetune model (FREEZE)
+        train_accs, val_accs = self._train(data_source=finetune_dataset, freeze=True)
+
+        print("\nFinetuning model training completed!")
+        print(f"Final overfitting gap: {train_accs[-1] - val_accs[-1]:.4f}")
+        print(f"Results saved to {config.ARTIFACTS_DIR / 'finetune_results.pkl'}")
+
+    def _train(
+        self,
+        data_source: Any,
+        freeze: bool = False,
+    ) -> tuple[np.ndarray, np.ndarray]:
         device = torch.device("cpu")
 
-        # call with standard parameters
-        flower_dataset = FlowerDataset(train_test_split=0.8)
-        data_loader = DataLoaderFlowers.create_dataloader_Pathchoice(kagglePath=self.dataset,flower_data_source=flower_dataset,augment_data=False)
-        # create model and initialize parameters
-        if self.finetune_bool:
-            model = loadTfL_ResNetModel(self.prev_numclasses, self.ft_numclasses, self.freeze)
-        else:
-            model = ResNet(num_classes=self.prev_numclasses)
+        is_finetune_dataset = isinstance(data_source, FlowerDataset)
 
-        model.apply(weights_init)
+        data_loader = CustomDataLoader.create_dataloader(data_source=data_source)
+
+        # create model and initialize parameters
+        if is_finetune_dataset:
+            model = load_tfl_model(data_loader.num_classes, freeze)
+        else:
+            model = ResNet(num_classes=data_loader.num_classes)
+            model.apply(weights_init)
 
         # choose loss function and optimizer
         criterion = nn.CrossEntropyLoss()
@@ -87,7 +109,7 @@ class ResNetModelTFLTrainer(Trainer):
 
         print("Training Unregularized ResNet...")
         save_str_prefix = "pretraining"
-        if self.finetune_bool:
+        if is_finetune_dataset:
             save_str_prefix = "finetune"
 
         save_str = save_str_prefix + "_model.pth"
@@ -100,14 +122,14 @@ class ResNetModelTFLTrainer(Trainer):
             n_correct_train = 0
             n_total_train = 0
 
-            for images, labels in data_loader.get_train_dataloader():
-                images = images.to(device)
-                labels = labels.to(device)
+            for image, label in data_loader.get_train_dataloader():
+                images_device = image.to(device)
+                labels_device = label.to(device)
 
                 optimizer.zero_grad()
 
-                y_pred = model(images)
-                loss = criterion(y_pred, labels)
+                y_pred = model(images_device)
+                loss = criterion(y_pred, labels_device)
 
                 loss.backward()
                 optimizer.step()
@@ -116,8 +138,8 @@ class ResNetModelTFLTrainer(Trainer):
 
                 # Compute training accuracy
                 _, predicted_labels = torch.max(y_pred, 1)
-                n_correct_train += (predicted_labels == labels).sum().item()
-                n_total_train += labels.shape[0]
+                n_correct_train += (predicted_labels == labels_device).sum().item()
+                n_total_train += labels_device.shape[0]
 
             train_loss = np.mean(train_loss)
             train_losses[epoch] = train_loss
@@ -129,20 +151,20 @@ class ResNetModelTFLTrainer(Trainer):
             n_correct_val = 0
             n_total_val = 0
             with torch.no_grad():
-                for images, labels in data_loader.get_test_dataloader():
-                    images = images.to(device)
-                    labels = labels.to(device)
+                for image, label in data_loader.get_test_dataloader():
+                    images_device = image.to(device)
+                    labels_device = label.to(device)
 
-                    y_pred = model(images)
-                    loss = criterion(y_pred, labels)
+                    y_pred = model(images_device)
+                    loss = criterion(y_pred, labels_device)
 
                     # Store the validation loss
                     val_loss.append(loss.item())
 
                     # Compute validation accuracy
                     _, predicted_labels = torch.max(y_pred, 1)
-                    n_correct_val += (predicted_labels == labels).sum().item()
-                    n_total_val += labels.shape[0]
+                    n_correct_val += (predicted_labels == labels_device).sum().item()
+                    n_total_val += labels_device.shape[0]
 
             val_loss = np.mean(val_loss)
             val_losses[epoch] = val_loss
@@ -157,9 +179,6 @@ class ResNetModelTFLTrainer(Trainer):
                 f"Duration: {duration}"
             )
 
-        # Save the model
-        #        torch.save(model.state_dict(), config.ARTIFACTS_DIR / "flower_classification_model.pth")
-
         torch.save(model.state_dict(), config.ARTIFACTS_DIR / save_str)
 
         # Save results for comparison
@@ -172,7 +191,8 @@ class ResNetModelTFLTrainer(Trainer):
         }
 
         print(save_str_prefix + "_results.pkl")
-        with open(config.ARTIFACTS_DIR / (save_str_prefix + "_results.pkl"), "wb") as f:
+        results_path = config.ARTIFACTS_DIR / (save_str_prefix + "_results.pkl")
+        with results_path.open("wb") as f:
             pickle.dump(original_results, f)
 
         return train_accs, val_accs
