@@ -13,54 +13,44 @@ from udl_project.training.abstract_trainer import Trainer
 from udl_project.utils.weights import weights_init
 
 
-class L2RegularizedModelTrainer(Trainer):
-    def __init__(self, weight_decay: float, *, epochs: int):
+class DataAugmentation(Trainer):
+    def __init__(self, *, epochs: int, learning_rate: float):
         super().__init__()
-
-        self.weight_decay = weight_decay
         self.epochs = epochs
+        self.learning_rate = learning_rate
 
     def train(self):
-        print("L2 REGULARIZATION TRAINING")
-        print(f"Using weight_decay={self.weight_decay}")
+        print("=" * 60)
+        print("TRAINING DATA AUGMENTED RESNET MODEL")
         print("=" * 60)
 
-        self._train()
+        train_accs, val_accs = self._train()
 
-        print("\nL2 REGULARIZATION TRAINING COMPLETED!")
-        print("Generated files:")
-        # TODO: create single point of reference for path names and so on
-        print("  - ../artifacts/l2_model_wd_0.01.pth")
-        print("  - ../artifacts/l2_results.pkl")
+        print("Data augmented model training completed!")
+        print(f"Final overfitting gap: {train_accs[-1] - val_accs[-1]:.4f}")
+        print(f"Results saved to {config.ARTIFACTS_DIR / 'augmented_results.pkl'}")
 
-    def _train(self):
-        print("=" * 60)
-        print(f"TRAINING L2 REGULARIZED RESNET (weight_decay={self.weight_decay})")
-        print("=" * 60)
-
+    def _train(self) -> tuple[np.ndarray, np.ndarray]:
         device = torch.device("cpu")
 
         flower_dataset = FlowerDataset(train_test_split=0.8)
-        data_loader = CustomDataLoader.create_dataloader(flower_dataset)
+        data_loader = CustomDataLoader.create_dataloader(flower_dataset, augment_data=True)
 
-        # Create model exactly the unregularized
+        # create model and initialize parameters
         model = ResNet(num_classes=data_loader.num_classes)
         model.apply(weights_init)
 
-        # MAIN DIFFERENCE: Adding weight_decay parameter to optimizer
+        # choose loss function and optimizer
         criterion = nn.CrossEntropyLoss()
-        optimizer = torch.optim.Adam(
-            model.parameters(),
-            lr=0.001,
-            weight_decay=self.weight_decay,  # Explicit L2 regularization
-        )
+        optimizer = torch.optim.Adam(model.parameters(), lr=self.learning_rate)
 
+        # initial tracking variables
         train_losses = np.zeros(self.epochs)
         val_losses = np.zeros(self.epochs)
         train_accs = np.zeros(self.epochs)
         val_accs = np.zeros(self.epochs)
 
-        print("Training L2 Regularized ResNet...")
+        print("Training Data Augmented ResNet...")
 
         for epoch in range(self.epochs):
             model.train()
@@ -71,26 +61,29 @@ class L2RegularizedModelTrainer(Trainer):
             n_correct_train = 0
             n_total_train = 0
 
-            # Training phase
             for images, labels in data_loader.get_train_dataloader():
                 images_device = images.to(device)
                 labels_device = labels.to(device)
 
                 optimizer.zero_grad()
+
                 y_pred = model(images_device)
                 loss = criterion(y_pred, labels_device)
+
                 loss.backward()
                 optimizer.step()
 
                 train_loss.append(loss.item())
 
+                # Compute training accuracy
                 _, predicted_labels = torch.max(y_pred, 1)
-                n_correct_train += (predicted_labels == labels_device).sum().item()
-                n_total_train += labels_device.shape[0]
+                n_correct_train += (predicted_labels == labels).sum().item()
+                n_total_train += labels.shape[0]
 
             train_loss = np.mean(train_loss)
             train_losses[epoch] = train_loss
             train_accs[epoch] = n_correct_train / n_total_train
+            print(train_loss)
 
             # Validation phase
             model.eval()
@@ -103,17 +96,21 @@ class L2RegularizedModelTrainer(Trainer):
 
                     y_pred = model(images_device)
                     loss = criterion(y_pred, labels_device)
+
+                    # Store the validation loss
                     val_loss.append(loss.item())
 
+                    # Compute validation accuracy
                     _, predicted_labels = torch.max(y_pred, 1)
-                    n_correct_val += (predicted_labels == labels_device).sum().item()
-                    n_total_val += labels_device.shape[0]
+                    n_correct_val += (predicted_labels == labels).sum().item()
+                    n_total_val += labels.shape[0]
 
             val_loss = np.mean(val_loss)
             val_losses[epoch] = val_loss
             val_accs[epoch] = n_correct_val / n_total_val
             duration = datetime.now() - t0
 
+            # Print the metrics for the current epoch
             print(
                 f"Epoch [{epoch + 1}/{self.epochs}] - "
                 f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_accs[epoch]:.4f} | "
@@ -121,31 +118,25 @@ class L2RegularizedModelTrainer(Trainer):
                 f"Duration: {duration}"
             )
 
-        torch.save(
-            model.state_dict(), config.ARTIFACTS_DIR / f"l2_model_wd_{self.weight_decay}.pth"
-        )
+        # Save the model
+        torch.save(model.state_dict(), config.ARTIFACTS_DIR / "flower_classification_model.pth")
 
-        l2_results = {
+        # Save results for comparison
+        original_results = {
             "train_losses": train_losses,
             "val_losses": val_losses,
             "train_accs": train_accs,
             "val_accs": val_accs,
-            "weight_decay": self.weight_decay,
-            "model_name": f"L2 Regularized (wd={self.weight_decay})",
+            "model_name": "Data Augmented ResNet",
         }
 
-        with (config.ARTIFACTS_DIR / "l2_results.pkl").open("wb") as f:
-            pickle.dump(l2_results, f)
+        with (config.ARTIFACTS_DIR / "augmented_results.pkl").open("wb") as f:
+            pickle.dump(original_results, f)
 
-        # Print summary for this configuration
-        overfitting_gap = train_accs[-1] - val_accs[-1]
-        print("\nL2 Regularized model training completed!")
-        print(f"Final overfitting gap: {overfitting_gap:.4f}")
-        print("Results saved to ../artifacts/l2_results.pkl")
+        return train_accs, val_accs
 
 
 if __name__ == "__main__":
-    # Example usage
-    trainer = L2RegularizedModelTrainer(weight_decay=0.01, epochs=25)
+    # example usage
+    trainer = DataAugmentation(learning_rate=0.001, epochs=10)
     trainer.train()
-    print("Training complete.")

@@ -1,9 +1,10 @@
+import copy
+import pickle
+from datetime import datetime
+
 import numpy as np
 import torch
-import torch.nn as nn
-from datetime import datetime
-import pickle
-import copy
+from torch import nn
 
 from udl_project import config
 from udl_project.data_loader_flowers import DataLoaderFlowers
@@ -13,10 +14,11 @@ from udl_project.utils.weights import weights_init
 
 
 class EarlyStoppingModelTrainer(Trainer):
-    def __init__(self, patience: int, min_delta: float = 0.0, monitor: str = 'val_loss', *, epochs: int):
-        """
-        Early stopping trainer for ResNet model.
-        
+    def __init__(
+        self, patience: int, min_delta: float = 0.0, monitor: str = "val_loss", *, epochs: int
+    ):
+        """Early stopping trainer for ResNet model.
+
         Args:
             patience: Number of epochs to wait for improvement before stopping
             min_delta: Minimum change in monitored quantity to qualify as improvement
@@ -24,12 +26,12 @@ class EarlyStoppingModelTrainer(Trainer):
             epochs: Maximum number of epochs to train
         """
         super().__init__()
-        
+
         self.patience = patience
         self.min_delta = min_delta
         self.monitor = monitor
         self.epochs = epochs
-        
+
         # Early stopping state
         self.best_score = None
         self.epochs_without_improvement = 0
@@ -38,7 +40,9 @@ class EarlyStoppingModelTrainer(Trainer):
 
     def train(self):
         print("EARLY STOPPING TRAINING")
-        print(f"Using patience={self.patience}, min_delta={self.min_delta}, monitor='{self.monitor}'")
+        print(
+            f"Using patience={self.patience}, min_delta={self.min_delta}, monitor='{self.monitor}'"
+        )
         print("=" * 60)
 
         self._train()
@@ -50,7 +54,9 @@ class EarlyStoppingModelTrainer(Trainer):
 
     def _train(self):
         print("=" * 60)
-        print(f"TRAINING RESNET WITH EARLY STOPPING (patience={self.patience}, monitor={self.monitor})")
+        print(
+            f"TRAINING RESNET WITH EARLY STOPPING (patience={self.patience}, monitor={self.monitor})"
+        )
         print("=" * 60)
 
         device = torch.device("cpu")
@@ -64,10 +70,7 @@ class EarlyStoppingModelTrainer(Trainer):
 
         # Standard optimizer without weight decay for pure early stopping
         criterion = nn.CrossEntropyLoss()
-        optimizer = torch.optim.Adam(
-            model.parameters(),
-            lr=0.001
-        )
+        optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
         train_losses = []
         val_losses = []
@@ -86,25 +89,25 @@ class EarlyStoppingModelTrainer(Trainer):
             n_total_train = 0
 
             # Training phase
-            for images, labels in data_loader.get_train_dataloader():
-                images = images.to(device)
-                labels = labels.to(device)
+            for image, label in data_loader.get_train_dataloader():
+                images_device = image.to(device)
+                labels_device = label.to(device)
 
                 optimizer.zero_grad()
-                y_pred = model(images)
-                loss = criterion(y_pred, labels)
+                y_pred = model(images_device)
+                loss = criterion(y_pred, labels_device)
                 loss.backward()
                 optimizer.step()
 
                 train_loss.append(loss.item())
 
                 _, predicted_labels = torch.max(y_pred, 1)
-                n_correct_train += (predicted_labels == labels).sum().item()
-                n_total_train += labels.shape[0]
+                n_correct_train += (predicted_labels == labels_device).sum().item()
+                n_total_train += labels_device.shape[0]
 
             train_loss_avg = np.mean(train_loss)
             train_acc = n_correct_train / n_total_train
-            
+
             train_losses.append(train_loss_avg)
             train_accs.append(train_acc)
 
@@ -113,24 +116,24 @@ class EarlyStoppingModelTrainer(Trainer):
             n_correct_val = 0
             n_total_val = 0
             with torch.no_grad():
-                for images, labels in data_loader.get_test_dataloader():
-                    images = images.to(device)
-                    labels = labels.to(device)
+                for image, label in data_loader.get_test_dataloader():
+                    images_device = image.to(device)
+                    labels_device = label.to(device)
 
-                    y_pred = model(images)
-                    loss = criterion(y_pred, labels)
+                    y_pred = model(images_device)
+                    loss = criterion(y_pred, labels_device)
                     val_loss.append(loss.item())
 
                     _, predicted_labels = torch.max(y_pred, 1)
-                    n_correct_val += (predicted_labels == labels).sum().item()
-                    n_total_val += labels.shape[0]
+                    n_correct_val += (predicted_labels == labels_device).sum().item()
+                    n_total_val += labels_device.shape[0]
 
             val_loss_avg = np.mean(val_loss)
             val_acc = n_correct_val / n_total_val
-            
+
             val_losses.append(val_loss_avg)
             val_accs.append(val_acc)
-            
+
             duration = datetime.now() - t0
 
             print(
@@ -171,32 +174,31 @@ class EarlyStoppingModelTrainer(Trainer):
             "model_name": f"Early Stopping (p={self.patience}, δ={self.min_delta})",
         }
 
-        with open(config.ARTIFACTS_DIR / "early_stopping_results.pkl", "wb") as f:
+        with (config.ARTIFACTS_DIR / "early_stopping_results.pkl").open("wb") as f:
             pickle.dump(early_stopping_results, f)
 
         # Print summary
         if len(train_accs) > 0 and len(val_accs) > 0:
             final_overfitting_gap = train_accs[-1] - val_accs[-1]
-            print(f"\nEarly stopping model training completed!")
+            print("\nEarly stopping model training completed!")
             print(f"Training stopped at epoch: {self.stopped_epoch}/{self.epochs}")
             print(f"Final overfitting gap: {final_overfitting_gap:.4f}")
             print(f"Best {self.monitor}: {self.best_score:.4f}")
             print("Results saved to ../artifacts/early_stopping_results.pkl")
 
-    def _check_early_stopping(self, val_loss: float, val_acc: float, model, epoch: int) -> bool:
-        """
-        Check if early stopping should be triggered.
-        
+    def _check_early_stopping(self, val_loss: float, val_acc: float, model) -> bool:
+        """Check if early stopping should be triggered.
+
         Returns:
             True if training should stop, False otherwise
         """
         # Determine current score based on monitoring metric
-        if self.monitor == 'val_loss':
+        if self.monitor == "val_loss":
             current_score = val_loss
-            is_better = lambda current, best: current < best - self.min_delta
-        elif self.monitor == 'val_acc':
+            is_better = lambda current, best: current < best - self.min_delta  # noqa: E731
+        elif self.monitor == "val_acc":
             current_score = val_acc
-            is_better = lambda current, best: current > best + self.min_delta
+            is_better = lambda current, best: current > best + self.min_delta  # noqa: E731
         else:
             raise ValueError(f"Unknown monitor metric: {self.monitor}")
 
@@ -216,8 +218,4 @@ class EarlyStoppingModelTrainer(Trainer):
             self.epochs_without_improvement += 1
             print(f"    → No improvement for {self.epochs_without_improvement} epochs")
 
-        # Check if patience exceeded
-        if self.epochs_without_improvement >= self.patience:
-            return True
-
-        return False
+        return self.epochs_without_improvement >= self.patience

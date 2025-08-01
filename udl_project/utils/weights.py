@@ -1,9 +1,8 @@
-import torch.nn as nn
+from torch import nn
 
 
 def weights_init(layer_in: nn.Module) -> None:
-    """
-    Initialize the weights of a given layer.
+    """Initialize the weights of a given layer.
 
     If the layer is an instance of nn.Linear, its weights are initialized using
     Kaiming uniform initialization and its biases are set to 0.
