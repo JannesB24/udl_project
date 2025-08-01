@@ -7,7 +7,8 @@ import torch
 from torch import nn
 
 from udl_project import config
-from udl_project.data_loader_flowers import DataLoaderFlowers
+from udl_project.data_handling.custom_data_loader import CustomDataLoader
+from udl_project.data_handling.flower_dataset import FlowerDataset
 from udl_project.models.res_net import ResNet
 from udl_project.training.abstract_trainer import Trainer
 from udl_project.utils.weights import weights_init
@@ -61,8 +62,8 @@ class EarlyStoppingModelTrainer(Trainer):
 
         device = torch.device("cpu")
 
-        # Call with standard parameters
-        data_loader = DataLoaderFlowers.create_dataloader()
+        flower_dataset = FlowerDataset(train_test_split=0.8)
+        data_loader = CustomDataLoader.create_dataloader(flower_dataset)
 
         # Create model
         model = ResNet(num_classes=data_loader.num_classes)
@@ -144,7 +145,7 @@ class EarlyStoppingModelTrainer(Trainer):
             )
 
             # Early stopping logic
-            if self._check_early_stopping(val_loss_avg, val_acc, model, epoch):
+            if self._check_early_stopping(val_loss_avg, val_acc, model):
                 print(f"\nEarly stopping triggered at epoch {epoch + 1}")
                 print(f"Best {self.monitor}: {self.best_score:.4f}")
                 print(f"Epochs without improvement: {self.epochs_without_improvement}")
