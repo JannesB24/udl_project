@@ -15,11 +15,12 @@ This project demonstrates a small residual network (ResNet) that initially strug
 - ✅ **L2 Regularization** (Section 9.1.2 from [book](https://udlbook.github.io/udlbook/))
 - 👷 **Early Stopping**
 - ✅ **Ensembling** (Section 9.3.2 from [book](https://udlbook.github.io/udlbook/))
+- ✅ **Data Augmentation** (Section 9.3.8 from [book](https://udlbook.github.io/udlbook/))
 - 👷 **Dropout**
 - 👷 **Applying noise**
 - 👷 **...**
 
-# Prerequisites
+# Dataset
 [This dataset](https://www.kaggle.com/datasets/lara311/flowers-five-classes) will be downloaded from kaggle via the `kagglehub` python package.
 
 
@@ -29,12 +30,14 @@ This project demonstrates a small residual network (ResNet) that initially strug
 ├── Makefile (*project setup on Linux based systems*)
 ├── README.md
 ├── artifacts (*place to store output from the project e.g. stored model*)
-│   └── flower_classification_model.pth
+│   ├── (various artifacts)
 ├── infrastructure (*(pinned) dependencies*)
 │   ├── requirements-dev.txt
 │   ├── requirements.in
 │   └── requirements.txt
+├── master_comparison.ipynb
 ├── pyproject.toml
+├── test_augmentation.ipynb
 └── udl_project (source code)
 </pre>
 
@@ -122,4 +125,4 @@ GitHub Copilot is being used in this project for the following purposes:
 - Giving explanation on code snippets
 - Support with arising bugs
 
-The idea and the work on the code itself did not stem from GitHub copilot and is the work of the authors.
+The idea and the work on the code itself is the work of the authors.

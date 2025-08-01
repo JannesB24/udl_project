@@ -1,10 +1,10 @@
 import logging
 import os
-from pathlib import Path
+from typing import Any
 
-import kagglehub
-from torch.utils.data import DataLoader, random_split
-from torchvision import datasets, transforms
+import torch
+from torch.utils.data import DataLoader, Dataset
+from torchvision.transforms import v2
 
 # TODO: possibly relocate to config file or make them accessible for other modules!?
 BATCH_SIZE = 32
@@ -12,19 +12,19 @@ IMAGE_DIM = (64, 64)
 NUM_WORKERS = os.cpu_count()
 
 
-class DataLoaderFlowers:
+class CustomDataLoader:
     def __init__(
         self,
-        dataset: datasets.ImageFolder,
-        train_size: int,
-        test_size: int,
+        train_data: Dataset,
+        test_data: Dataset,
         batch_size: int,
         num_workers: int,
     ) -> None:
-        self.train_data, self.test_data = random_split(dataset, [train_size, test_size])
+        self.train_data = train_data
+        self.test_data = test_data
         self.batch_size = batch_size
         self.num_workers = num_workers
-        self.num_classes = len(dataset.classes)
+        self.num_classes = len(train_data.classes)
 
     def get_test_dataloader(self) -> DataLoader:
         """Creates a DataLoader for the test dataset.
@@ -56,39 +56,56 @@ class DataLoaderFlowers:
 
     @staticmethod
     def create_dataloader(
+        data_source: Any,
         batch_size: int = BATCH_SIZE,
         num_workers: int = NUM_WORKERS,
         image_dim: tuple = IMAGE_DIM,
-    ) -> "DataLoaderFlowers":
-        """Creates an instance of the DataLoaderFlowers class.
+        augment_data: bool = False,
+    ) -> "CustomDataLoader":
+        """Creates an instance of the CustomDataLoader class.
 
         Args:
-            data_directory (Path): Path to the directory containing the image dataset.
+            data_source (Any): Source dataset containing images and labels.
             batch_size (int): Number of samples per batch.
             num_workers (int): Number of subprocesses to use for data loading.
             image_dim (tuple): Dimensions to which images will be resized (square).
+            augment_data (bool): Whether to apply data augmentation or not.
 
         Returns:
-            DataLoaderFlowers: DataLoaderFlowers instance
+            CustomDataLoader: CustomDataLoader instance
         """
-        # Download latest version
-        data_directory = Path(kagglehub.dataset_download("lara311/flowers-five-classes"))
-        print(f"Data directory: {data_directory}")
-
-        simple_transform = transforms.Compose(
+        augment_transform = v2.Compose(
             [
-                transforms.Resize(image_dim),
-                transforms.ToTensor(),
+                v2.RandomResizedCrop(image_dim, scale=(0.8, 1.0), antialias=True),
+                v2.RandomHorizontalFlip(),
+                v2.RandomRotation(degrees=45),  # +- 45 degrees
+                v2.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.3, hue=0.1),
+                v2.ToImage(),
+                v2.ToDtype(torch.float32, scale=True),
             ]
         )
-        dataset = datasets.ImageFolder(data_directory / "train", transform=simple_transform)
-        train_size = int(0.8 * len(dataset))
-        test_size = len(dataset) - train_size
+        not_augment_transform = v2.Compose(
+            [
+                v2.Resize(image_dim, antialias=True),
+                v2.CenterCrop(image_dim),
+                v2.ToImage(),
+                v2.ToDtype(torch.float32, scale=True),
+            ]
+        )
 
-        return DataLoaderFlowers(
-            dataset=dataset,
-            train_size=train_size,
-            test_size=test_size,
+        if augment_data:
+            train_data = data_source.get_train_subset(augment_transform)
+        else:
+            train_data = data_source.get_train_subset(not_augment_transform)
+
+        test_data = data_source.get_test_subset(not_augment_transform)
+
+        # Create a CustomDataLoader instance using the split datasets
+        loader = CustomDataLoader(
+            train_data=train_data,
+            test_data=test_data,
             batch_size=batch_size,
             num_workers=num_workers,
         )
+
+        return loader

@@ -6,7 +6,8 @@ import torch
 from torch import nn
 
 from udl_project import config
-from udl_project.data_loader_flowers import DataLoaderFlowers
+from udl_project.data_handling.custom_data_loader import CustomDataLoader
+from udl_project.data_handling.flower_dataset import FlowerDataset
 from udl_project.models.ensemble_model import EnsembleModel
 from udl_project.training.abstract_trainer import Trainer
 
@@ -37,10 +38,10 @@ class EnsembleModelTrainer(Trainer):
 
         device = torch.device("cpu")
 
-        # use standard parameters of the data loader
-        dataloader = DataLoaderFlowers.create_dataloader()
+        flower_dataset = FlowerDataset(train_test_split=0.8)
+        data_loader = CustomDataLoader.create_dataloader(flower_dataset)
 
-        model = EnsembleModel(num_classes=dataloader.num_classes, num_models=self.num_models)
+        model = EnsembleModel(num_classes=data_loader.num_classes, num_models=self.num_models)
         model.to(device)
 
         criterion = nn.CrossEntropyLoss()
@@ -63,7 +64,7 @@ class EnsembleModelTrainer(Trainer):
             n_total_train = 0
 
             # Training phase
-            for images, labels in dataloader.get_train_dataloader():
+            for images, labels in data_loader.get_train_dataloader():
                 images_device = images.to(device)
                 labels_device = labels.to(device)
 
@@ -88,7 +89,7 @@ class EnsembleModelTrainer(Trainer):
             n_correct_val = 0
             n_total_val = 0
             with torch.no_grad():
-                for images, labels in dataloader.get_test_dataloader():
+                for images, labels in data_loader.get_test_dataloader():
                     images_device = images.to(device)
                     labels_device = labels.to(device)
 
