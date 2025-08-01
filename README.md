@@ -5,7 +5,6 @@
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-0C3C4C.svg)](https://github.com/astral-sh/ruff)
 
 # udl_project
-⚒️ *Work In Progress*
 
 This repository was created for the seminar "[Understanding Deep Learning](https://udlbook.github.io/udlbook/)" which took place in the summer term of 2025 at the University of Osnabrück.
 
@@ -13,15 +12,14 @@ This repository was created for the seminar "[Understanding Deep Learning](https
 This project demonstrates a small residual network (ResNet) that initially struggles to accurately classify the dataset mentioned in the [prerequisites](#prerequisites). Various regularization techniques are applied and compared to improve its performance. The goal is to showcase a comprehensive comparison of different regularization techniques and their impact on the model's performance.
 
 - ✅ **L2 Regularization** (Section 9.1.2 from [book](https://udlbook.github.io/udlbook/))
-- 👷 **Early Stopping**
+- ✅ **Early Stopping** (Section 9.3.1 from [book](https://udlbook.github.io/udlbook/))
 - ✅ **Ensembling** (Section 9.3.2 from [book](https://udlbook.github.io/udlbook/))
+- ✅ **Dropout** (Section 9.3.3 from [book](https://udlbook.github.io/udlbook/))
 - ✅ **Data Augmentation** (Section 9.3.8 from [book](https://udlbook.github.io/udlbook/))
-- 👷 **Dropout**
-- 👷 **Applying noise**
-- 👷 **...**
 
 # Dataset
-[This dataset](https://www.kaggle.com/datasets/lara311/flowers-five-classes) will be downloaded from kaggle via the `kagglehub` python package.
+[A flower dataset](https://www.kaggle.com/datasets/lara311/flowers-five-classes) will be downloaded from kaggle via the `kagglehub` python package.
+For transfer learning a [tiny food dataset](https://www.kaggle.com/datasets/msarmi9/food101tiny) will be used.
 
 
 ## Project Setup
